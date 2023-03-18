@@ -32,19 +32,7 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
 
   const ref =
     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
-
-  const { data: receivedMessages = { content: [] } } = useGetMessagesQuery(
-    roomId,
-    {
-      refetchOnMountOrArgChange: true,
-      skip: !roomId,
-    }
-  );
-
-  useEffect(() => {
-    if (receivedMessages.content.length)
-      dispatch(getMessages(receivedMessages.content));
-  }, [dispatch, receivedMessages.content]);
+  console.log("dsadsa");
 
   const handleSocketMessage = useCallback(
     (message: Stomp.Message) => {
@@ -52,6 +40,8 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
 
       switch (headers["event-type"]) {
         case "chat-message": {
+          console.log("Gooooooooooooooooooooot");
+
           dispatch(localAddMessage(JSON.parse(message.body)));
           break;
         }
@@ -84,20 +74,17 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   useStompSubscription({
     roomId,
     clientSocket,
+    // readyToSubscribe: !!roomId,
     handleSocketMessage,
     subscribeOn: "chat",
   });
 
-  const scrollToBottomOfList = useCallback(() => {
+  const scrollToBottomOfList = () => {
     ref.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-  }, [ref]);
-
-  const handleButtonClick = useCallback(() => {
-    scrollToBottomOfList();
-  }, [scrollToBottomOfList]);
+  };
 
   return (
     <Grid
@@ -113,10 +100,10 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
         <ChatHeader />
       </Grid>
       <Grid item xs sx={{ overflowY: "auto" }}>
-        <Messages refer={ref} />
+        <Messages />
       </Grid>
       <Grid item sx={{ flexShrink: 0 }}>
-        <SendMessageBar onClick={handleButtonClick} />
+        <SendMessageBar onClick={scrollToBottomOfList} />
       </Grid>
     </Grid>
   );

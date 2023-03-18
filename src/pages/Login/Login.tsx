@@ -37,7 +37,7 @@ const Login: React.FC = () => {
           navigate("/");
           setCookie("token", token, {
             path: "/",
-            expires: new Date(Date.now() + 1000000),
+            expires: new Date(Date.now() + 10000000),
           });
           localStorage.setItem("token", token);
         }

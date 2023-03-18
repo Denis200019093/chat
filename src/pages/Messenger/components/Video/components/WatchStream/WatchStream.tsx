@@ -18,7 +18,6 @@ interface MessageHeaders {
 const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   clientSocket,
 }) => {
-  const [readyToWatch, setReadyWatch] = useState<boolean>(false);
   const [peerConnection, setPeerConnection] =
     useState<RTCPeerConnection | null>(null);
 
@@ -69,6 +68,7 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
     roomId,
     clientSocket,
     handleSocketMessage,
+    // readyToSubscribe: !!peerConnection,
     username: me?.username,
     subscribeOn: "live-stream",
   });
@@ -76,7 +76,6 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   const connectToStream = async () => {
     if (!peerConnection) {
       const pc = new RTCPeerConnection();
-      console.log(me?.username);
 
       clientSocket?.send(
         `/chatrooms/${roomId}/streamer`,
@@ -110,7 +109,6 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
         }
       };
 
-      setReadyWatch(true);
       setPeerConnection(pc);
     }
   };

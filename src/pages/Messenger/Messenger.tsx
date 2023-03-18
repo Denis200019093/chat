@@ -5,7 +5,7 @@ import { CSSTransition } from "react-transition-group";
 import { useCookies } from "react-cookie";
 
 import { createStompClient } from "src/configs/stomp";
-import { useAppSelector } from "src/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 
 import Sidebar from "./components/Sidebar";
 
@@ -59,28 +59,16 @@ const Messenger: React.FC = () => {
     };
   }, [cookies.token]);
 
-  const [width, setWidth] = useState<boolean>(false);
-
   return (
     <Grid container sx={{ overflow: "hidden", height: "100vh" }}>
       <Grid item xs={2}>
         <Sidebar />
       </Grid>
-      <CSSTransition
-        nodeRef={nodeRef}
-        in={streamStarted || iWatch}
-        timeout={300}
-        unmountOnExit
-        classNames="alert"
-        onEntered={() => setWidth(true)}
-        onExited={() => setWidth(false)}
-      >
-        <Grid ref={nodeRef} item xs={7.25}>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Video clientSocket={clientSocket} />
-          </Suspense>
-        </Grid>
-      </CSSTransition>
+      <Grid ref={nodeRef} item xs={streamStarted || iWatch ? 7.25 : 0}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Video clientSocket={clientSocket} />
+        </Suspense>
+      </Grid>
       {roomId ? (
         <>
           <Grid
@@ -89,13 +77,13 @@ const Messenger: React.FC = () => {
             justifyContent="center"
             alignItems="center"
             sx={{ overflow: "hidden" }}
-            xs={streamStarted || width ? 2.75 : 7.5}
+            xs={streamStarted || iWatch ? 2.75 : 7.5}
           >
             <Suspense fallback={<div>Loading...</div>}>
               <Chat clientSocket={clientSocket} />
             </Suspense>
           </Grid>
-          {!streamStarted || !width ? (
+          {!streamStarted ? (
             <Grid item xs={2.5}>
               <Suspense fallback={<div>Loading...</div>}>
                 <RoomProfile />

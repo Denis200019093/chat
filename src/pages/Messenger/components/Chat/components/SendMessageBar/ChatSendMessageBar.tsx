@@ -47,7 +47,6 @@ const SendMessageBar: React.FC<IProps> = ({ onClick }) => {
   const submitSendMessage = async ({ content }: ISendMessageData) => {
     try {
       if (roomId) {
-        console.log("Ky");
         if (editStatus.isEditing && editStatus.messageId) {
           editMessage({ content, messageId: editStatus.messageId });
           dispatch(endEdit());

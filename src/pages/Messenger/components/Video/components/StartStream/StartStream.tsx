@@ -110,41 +110,47 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [clientSocket, peerConnections, roomId, stream]
   );
 
-  const handleSocketMessage = async (message: Stomp.Message) => {
-    const data = JSON.parse(message.body);
-    console.log("handleSocketMessage streamer", data.event);
-    switch (data.event) {
-      case "connect": {
-        createConnectionStream(data.username);
-        break;
+  const handleSocketMessage = useCallback(
+    async (message: Stomp.Message) => {
+      const data = JSON.parse(message.body);
+      console.log("handleSocketMessage streamer", data.event);
+      switch (data.event) {
+        case "connect": {
+          createConnectionStream(data.username);
+          break;
+        }
+        case "answer": {
+          const username = data.username;
+          const peerConnection = peerConnections?.[username];
+
+          if (peerConnection)
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(data.data)
+            );
+
+          break;
+        }
+
+        case "candidate": {
+          const username = data.username;
+          const peerConnection = peerConnections && peerConnections[username];
+
+          if (peerConnection)
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(data.data)
+            );
+
+          break;
+        }
       }
-      case "answer": {
-        const username = data.username;
-        const peerConnection = peerConnections?.[username];
-
-        if (peerConnection)
-          await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(data.data)
-          );
-
-        break;
-      }
-
-      case "candidate": {
-        const username = data.username;
-        const peerConnection = peerConnections && peerConnections[username];
-
-        if (peerConnection)
-          await peerConnection.addIceCandidate(new RTCIceCandidate(data.data));
-
-        break;
-      }
-    }
-  };
+    },
+    [createConnectionStream, peerConnections]
+  );
 
   useStompSubscription({
     roomId,
     clientSocket,
+    // readyToSubscribe: !!stream,
     handleSocketMessage,
     subscribeOn: "my-stream",
   });
@@ -153,7 +159,6 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     <Grid container item justifyContent="center">
       <video
         controls
-        hidden={!stream}
         style={{ height: "100%", width: "100%" }}
         autoPlay
         ref={yourStream}

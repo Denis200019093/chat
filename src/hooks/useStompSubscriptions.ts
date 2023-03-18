@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
 import { useAppDispatch } from "./useRedux";
@@ -12,10 +12,9 @@ type UseStompSubscriptionParams = {
   handleSocketMessage: (message: Stomp.Message) => Promise<void> | void;
 };
 
-export const useStompSubscription = ({
+const useStompSubscription = ({
   roomId,
   clientSocket,
-  // readyToSubscribe,
   subscribeOn,
   username,
   handleSocketMessage,
@@ -39,25 +38,27 @@ export const useStompSubscription = ({
   }, [roomId, subscribeOn, username]);
 
   useEffect(() => {
-    if (
-      clientSocket &&
-      clientSocket.connected &&
-      urlSubscribe.length &&
-      subscribeOn
-    ) {
+    if (clientSocket && subscribeOn) {
       subscriptionRef.current = clientSocket.subscribe(
         urlSubscribe,
         handleSocketMessage,
         { id: roomId }
       );
     }
+
     const handleBeforeUnload = () => subscriptionRef.current?.unsubscribe();
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      subscriptionRef.current?.unsubscribe();
+
+      const subscription = subscriptionRef.current;
+
+      if (subscription) {
+        subscription.unsubscribe();
+        console.log("Unsubscribed from subscription");
+      }
     };
   }, [clientSocket, handleSocketMessage, roomId, subscribeOn, urlSubscribe]);
 };

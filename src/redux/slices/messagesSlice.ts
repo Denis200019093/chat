@@ -30,7 +30,9 @@ const messagesSlice = createSlice({
       state.messages = action.payload;
     },
     localAddMessage(state, action: PayloadAction<IMessage>) {
-      state.messages = state.messages.concat(action.payload);
+      console.log("kysss");
+      
+      state.messages = [...state.messages, action.payload];
     },
     localDeleteMessage(state, action: PayloadAction<number>) {
       state.messages = state.messages.filter(

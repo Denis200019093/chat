@@ -1,15 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Grid, styled } from "@mui/material";
 
 import Message from "./components/Message";
-import { useAppSelector } from "src/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { useGetMessagesQuery } from "src/redux/features/messages.api";
+import { getMessages } from "src/redux/slices/messagesSlice";
 
-interface IProps {
-  refer: React.MutableRefObject<HTMLDivElement>;
-}
+const Messages: React.FC = () => {
+  const { messages, roomId } = useAppSelector((state) => state.messages);
 
-const Messages: React.FC<IProps> = ({ refer }) => {
-  const { messages } = useAppSelector((state) => state.messages);
+  const dispatch = useAppDispatch();
+
+  const { data: receivedMessages = { content: [] } } = useGetMessagesQuery(
+    roomId,
+    {
+      refetchOnMountOrArgChange: true,
+      skip: !roomId,
+    }
+  );
+
+  useEffect(() => {
+    if (receivedMessages.content.length)
+      dispatch(getMessages(receivedMessages.content));
+  }, [dispatch, receivedMessages.content]);
 
   return (
     <ChatContainer
@@ -23,7 +36,6 @@ const Messages: React.FC<IProps> = ({ refer }) => {
           <Message key={message.id} message={message} />
         ))}
       </Grid>
-      <Grid ref={refer} />
     </ChatContainer>
   );
 };

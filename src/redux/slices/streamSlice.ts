@@ -1,13 +1,16 @@
+import Stomp from "stompjs";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IState {
   // stream: MediaStream | null;
+  clientSocket: Stomp.Client | null;
   peerConnections: { [username: string]: RTCPeerConnection };
   iWatch: boolean;
 }
 
 const initialState: IState = {
   // stream: null,
+  clientSocket: null,
   peerConnections: {},
   iWatch: false,
 };
@@ -16,9 +19,9 @@ const streamSlice = createSlice({
   name: "stream",
   initialState,
   reducers: {
-    // setStream(state, action: PayloadAction<MediaStream>) {
-    //   state.stream = action.payload;
-    // },
+    setClientSocket(state, action: PayloadAction<Stomp.Client>) {
+      state.clientSocket = action.payload;
+    },
     // setPeerConnection(
     //   state,
     //   action: PayloadAction<{
@@ -39,5 +42,5 @@ const streamSlice = createSlice({
   },
 });
 
-export const { setWatch } = streamSlice.actions;
+export const { setWatch, setClientSocket } = streamSlice.actions;
 export const streamReducer = streamSlice.reducer;
