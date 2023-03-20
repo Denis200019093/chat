@@ -9,7 +9,7 @@ export interface IUser {
 export interface IRoom {
   id: number;
   name: string;
-  description?: string;
+  description: string;
   streamOn: boolean;
   users: string[];
 }

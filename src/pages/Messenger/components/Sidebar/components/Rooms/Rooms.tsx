@@ -1,14 +1,19 @@
 import React from "react";
-import { Avatar, Grid, Typography } from "@mui/material";
+import { Avatar, Grid } from "@mui/material";
 
+import MultiLineText from "src/components/MultiLineText";
 import { useGetRoomsQuery } from "src/redux/features/chatRooms.api";
-import { getRoomId } from "src/redux/slices/messagesSlice";
+import { getRoomId } from "src/redux/slices/roomSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
 
 const Rooms: React.FC = () => {
   const { data: rooms } = useGetRoomsQuery();
 
   const dispatch = useAppDispatch();
+
+  const joinRoom = (roomId: number) => {
+    dispatch(getRoomId(roomId));
+  };
 
   return (
     <>
@@ -18,15 +23,15 @@ const Rooms: React.FC = () => {
           container
           item
           sx={{
-            p: 2,
+            p: "16px 8px",
             transition: "0.3s",
+            cursor: "pointer",
             "&:hover": {
               bgcolor: "rgba(255,255,255,0.15)",
             },
           }}
-          onClick={() => dispatch(getRoomId(room.id))}
+          onClick={() => joinRoom(room.id)}
           flexWrap="nowrap"
-          alignItems="flex-start"
         >
           <Grid item>
             <Avatar
@@ -36,10 +41,14 @@ const Rooms: React.FC = () => {
           </Grid>
           <Grid item>
             <Grid container item>
-              <Typography>{room.name}</Typography>
+              <MultiLineText text={room.name} variant="h6" />
             </Grid>
             <Grid container item>
-              <Typography>{room.description}</Typography>
+              <MultiLineText
+                text={room.description}
+                quantityLines={2}
+                variant="body2"
+              />
             </Grid>
           </Grid>
         </Grid>

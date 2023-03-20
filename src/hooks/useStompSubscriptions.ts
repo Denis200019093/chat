@@ -1,48 +1,66 @@
-import { useEffect, useRef, useMemo, useCallback, useState } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
-import { useAppDispatch } from "./useRedux";
 
 type UseStompSubscriptionParams = {
   roomId: number;
   clientSocket: Stomp.Client | null;
-  // readyToSubscribe: boolean;
+  readyToSubscribe: boolean;
   subscribeOn: "chat" | "my-stream" | "live-stream";
-  username?: string;
   handleSocketMessage: (message: Stomp.Message) => Promise<void> | void;
+  username?: string;
 };
 
 const useStompSubscription = ({
   roomId,
   clientSocket,
+  readyToSubscribe,
   subscribeOn,
-  username,
   handleSocketMessage,
+  username,
 }: UseStompSubscriptionParams) => {
   const subscriptionRef = useRef<StompSubscription | null>(null);
 
-  const urlSubscribe = useMemo(() => {
-    switch (subscribeOn) {
-      case "chat": {
-        return `/chatrooms/${roomId}`;
-      }
-      case "my-stream": {
-        return `/chatrooms/${roomId}/streamer`;
-      }
-      case "live-stream": {
-        return `/chatrooms/${roomId}/viewer/${username}`;
-      }
-      default:
-        return "";
+  let urlSubscribe = "";
+
+  switch (subscribeOn) {
+    case "chat": {
+      urlSubscribe = `/chatrooms/${roomId}`;
+      break;
     }
-  }, [roomId, subscribeOn, username]);
+    case "my-stream": {
+      urlSubscribe = `/chatrooms/${roomId}/streamer`;
+      break;
+    }
+    case "live-stream": {
+      urlSubscribe = `/chatrooms/${roomId}/viewer/${username}`;
+      break;
+    }
+    default:
+      break;
+  }
+
+  // const urlSubscribe = useMemo(() => {
+  //   switch (subscribeOn) {
+  //     case "chat": {
+  //       return `/chatrooms/${roomId}`;
+  //     }
+  //     case "my-stream": {
+  //       return `/chatrooms/${roomId}/streamer`;
+  //     }
+  //     case "live-stream": {
+  //       return `/chatrooms/${roomId}/viewer/${username}`;
+  //     }
+  //     default:
+  //       return "";
+  //   }
+  // }, [roomId, subscribeOn, username]);
 
   useEffect(() => {
-    if (clientSocket && subscribeOn) {
+    if (clientSocket && subscribeOn && readyToSubscribe) {
       subscriptionRef.current = clientSocket.subscribe(
         urlSubscribe,
-        handleSocketMessage,
-        { id: roomId }
+        handleSocketMessage
       );
     }
 
@@ -60,7 +78,14 @@ const useStompSubscription = ({
         console.log("Unsubscribed from subscription");
       }
     };
-  }, [clientSocket, handleSocketMessage, roomId, subscribeOn, urlSubscribe]);
+  }, [
+    clientSocket,
+    handleSocketMessage,
+    readyToSubscribe,
+    roomId,
+    subscribeOn,
+    urlSubscribe,
+  ]);
 };
 
 export default useStompSubscription;

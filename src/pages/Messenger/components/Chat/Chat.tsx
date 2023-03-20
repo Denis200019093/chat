@@ -7,13 +7,11 @@ import ChatHeader from "./components/ChatHeader";
 import SendMessageBar from "./components/SendMessageBar";
 import Messages from "./components/Messages";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { useGetMessagesQuery } from "src/redux/features/messages.api";
 import {
   localAddMessage,
   localDeleteMessage,
   localEditMessage,
-  getMessages,
-} from "src/redux/slices/messagesSlice";
+} from "src/redux/slices/roomSlice";
 import {
   localDeleteActiveUser,
   localSetActiveUser,
@@ -30,18 +28,12 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   const { roomId } = useAppSelector((state) => state.messages);
   const dispatch = useAppDispatch();
 
-  const ref =
-    useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
-  console.log("dsadsa");
-
   const handleSocketMessage = useCallback(
     (message: Stomp.Message) => {
       const headers = message.headers as MessageHeaders;
 
       switch (headers["event-type"]) {
         case "chat-message": {
-          console.log("Gooooooooooooooooooooot");
-
           dispatch(localAddMessage(JSON.parse(message.body)));
           break;
         }
@@ -74,17 +66,10 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   useStompSubscription({
     roomId,
     clientSocket,
-    // readyToSubscribe: !!roomId,
+    readyToSubscribe: true,
     handleSocketMessage,
     subscribeOn: "chat",
   });
-
-  const scrollToBottomOfList = () => {
-    ref.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  };
 
   return (
     <Grid
@@ -103,7 +88,7 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
         <Messages />
       </Grid>
       <Grid item sx={{ flexShrink: 0 }}>
-        <SendMessageBar onClick={scrollToBottomOfList} />
+        <SendMessageBar />
       </Grid>
     </Grid>
   );

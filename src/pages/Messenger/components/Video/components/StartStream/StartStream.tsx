@@ -11,101 +11,107 @@ interface IProps {
 
 const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
-  // const [readyToStream, setReadyStream] = useState<boolean>(false);
+  const [readyToStream, setReadyStream] = useState<boolean>(false);
   const [peerConnections, setPeerConnections] = useState<{
     [username: string]: RTCPeerConnection;
   }>({});
 
-  const yourStream = useRef<HTMLVideoElement>(null);
+  const currentStream = useRef<HTMLVideoElement>(null);
 
   const { roomId } = useAppSelector((state) => state.messages);
 
-  const startStream = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: true,
-    });
-    if (yourStream.current) yourStream.current.srcObject = stream;
-    setStream(stream);
-  }, []);
+  const startStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+
+      if (currentStream.current && stream) {
+        currentStream.current.srcObject = stream;
+        setStream(stream);
+        setReadyStream(!!stream);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const stopStream = () => {
     stream?.getTracks().forEach((track) => {
       track.stop();
     });
     setStream(null);
+    setReadyStream(false);
   };
 
   const createConnectionStream = useCallback(
     async (username: string) => {
-      if (peerConnections[username]) {
+      if (peerConnections[username] || !clientSocket) {
         return;
       }
-      // console.log("Create conentcion stream");
 
-      if (clientSocket) {
-        const peerConnection = new RTCPeerConnection();
+      const peerConnection = new RTCPeerConnection();
 
-        setPeerConnections((prevPeerConnections) => ({
-          ...prevPeerConnections,
-          [username]: peerConnection,
-        }));
+      setPeerConnections((prevPeerConnections) => ({
+        ...prevPeerConnections,
+        [username]: peerConnection,
+      }));
 
-        peerConnection.onicecandidate = (event) => {
-          if (event.candidate) {
-            const messageCandidate = {
-              event: "candidate",
-              data: event.candidate,
-            };
-
-            clientSocket.send(
-              `/chatrooms/${roomId}/viewer/${username}`,
-              {},
-              JSON.stringify(messageCandidate)
-            );
-          }
-        };
-
-        peerConnection.onnegotiationneeded = async () => {
-          const offer = await peerConnection.createOffer();
-          await peerConnection.setLocalDescription(offer);
-          const messageOffer = {
-            event: "offer",
-            data: offer,
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          const messageCandidate = {
+            event: "candidate",
+            data: event.candidate,
           };
 
           clientSocket.send(
             `/chatrooms/${roomId}/viewer/${username}`,
             {},
-            JSON.stringify(messageOffer)
+            JSON.stringify(messageCandidate)
           );
+        }
+      };
+
+      peerConnection.onnegotiationneeded = async () => {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        const messageOffer = {
+          event: "offer",
+          data: offer,
         };
 
-        peerConnection.onconnectionstatechange = () => {
-          const connectionState = peerConnection.connectionState;
+        clientSocket.send(
+          `/chatrooms/${roomId}/viewer/${username}`,
+          {},
+          JSON.stringify(messageOffer)
+        );
+      };
 
-          if (connectionState === "disconnected") {
-            // setPeerConnections((prev) => {
-            //   const { [username]: deletedConnection, ...remainingConnections } = prev;
-            //   return { ...prev, peerConnections: remainingConnections };
-            // });
+      peerConnection.onconnectionstatechange = () => {
+        const connectionState = peerConnection.connectionState;
 
-            const { username, ...newState } = peerConnections;
-            setPeerConnections(newState);
+        if (connectionState === "disconnected") {
+          // setPeerConnections((prev) => {
+          //   const { [username]: deletedConnection, ...remainingConnections } = prev;
+          //   return { ...prev, peerConnections: remainingConnections };
+          // });
 
-            // setPeerConnections(prevState => {
-            //   const {[username]: peerConnection, ...rest} = prevState;
-            //   return rest;
-            // });
+          const { username, ...newState } = peerConnections;
+          setPeerConnections(newState);
 
-            // setPeerConnections((prev) => delete prev[username]);
-          }
-        };
+          // setPeerConnections(prevState => {
+          //   const {[username]: peerConnection, ...rest} = prevState;
+          //   return rest;
+          // });
 
-        stream?.getTracks().forEach((track) => {
-          peerConnection.addTrack(track, stream);
-        });
-      }
+          // setPeerConnections((prev) => delete prev[username]);
+        }
+      };
+
+      stream?.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, stream);
+      });
     },
     [clientSocket, peerConnections, roomId, stream]
   );
@@ -113,7 +119,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const handleSocketMessage = useCallback(
     async (message: Stomp.Message) => {
       const data = JSON.parse(message.body);
-      console.log("handleSocketMessage streamer", data.event);
+
       switch (data.event) {
         case "connect": {
           createConnectionStream(data.username);
@@ -150,18 +156,18 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   useStompSubscription({
     roomId,
     clientSocket,
-    // readyToSubscribe: !!stream,
+    readyToSubscribe: readyToStream,
     handleSocketMessage,
     subscribeOn: "my-stream",
   });
 
   return (
-    <Grid container item justifyContent="center">
+    <Grid container item sx={{ mt: "65px" }} justifyContent="center">
       <video
         controls
         style={{ height: "100%", width: "100%" }}
         autoPlay
-        ref={yourStream}
+        ref={currentStream}
       />
       <Button
         size="large"

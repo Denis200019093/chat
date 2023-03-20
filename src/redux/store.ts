@@ -1,7 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { chatRoomsApi } from "./features/chatRooms.api";
 
-import { messagesReducer } from "./slices/messagesSlice";
+import { messagesReducer } from "./slices/roomSlice";
 import { modesReducer } from "./slices/modesSlice";
 import { usersReducer } from "./slices/usersSlice";
 import { streamReducer } from "./slices/streamSlice";

@@ -4,12 +4,12 @@ import { IMessage } from "../../types/root";
 
 interface IState {
   messages: IMessage[];
+  roomId: number;
   editStatus: {
     isEditing: boolean;
     messageId: number | null;
     messageContent: string;
   };
-  roomId: number;
 }
 
 const initialState: IState = {
@@ -31,7 +31,7 @@ const messagesSlice = createSlice({
     },
     localAddMessage(state, action: PayloadAction<IMessage>) {
       console.log("kysss");
-      
+
       state.messages = [...state.messages, action.payload];
     },
     localDeleteMessage(state, action: PayloadAction<number>) {

@@ -4,7 +4,7 @@ import { Grid, styled } from "@mui/material";
 import Message from "./components/Message";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import { getMessages } from "src/redux/slices/messagesSlice";
+import { getMessages } from "src/redux/slices/roomSlice";
 
 const Messages: React.FC = () => {
   const { messages, roomId } = useAppSelector((state) => state.messages);
@@ -20,17 +20,13 @@ const Messages: React.FC = () => {
   );
 
   useEffect(() => {
-    if (receivedMessages.content.length)
+    if (receivedMessages && receivedMessages.content.length) {
       dispatch(getMessages(receivedMessages.content));
-  }, [dispatch, receivedMessages.content]);
+    }
+  }, [dispatch, receivedMessages, receivedMessages.content]);
 
   return (
-    <ChatContainer
-      container
-      item
-      sx={{ bgcolor: "rgba(25,25,25,1)" }}
-      justifyContent="center"
-    >
+    <ChatContainer container item justifyContent="center">
       <Grid container item xs={11}>
         {messages.map((message) => (
           <Message key={message.id} message={message} />

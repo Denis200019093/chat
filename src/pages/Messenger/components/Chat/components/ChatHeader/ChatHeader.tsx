@@ -32,7 +32,7 @@ const ChatHeader: React.FC = () => {
       container
       item
       sx={{
-        bgcolor: "rgba(35,35,35,0.1)",
+        bgcolor: "rgb(35,35,35)",
       }}
     >
       <Grid

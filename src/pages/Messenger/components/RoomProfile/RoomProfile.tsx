@@ -26,7 +26,7 @@ const RoomProfile: React.FC = () => {
   return (
     <Grid
       item
-      sx={{ pl: 2, pr: 2, bgcolor: "rgba(35,35,35,0.1)", height: "100%" }}
+      sx={{ pl: 2, pr: 2, bgcolor: "rgb(35,35,35)", height: "100%" }}
     >
       <Grid item>
         <Grid container item sx={{ height: "65px" }} alignItems="center">

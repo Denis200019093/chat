@@ -10,8 +10,7 @@ import Profile from "./pages/Profile";
 import { useCookies } from "react-cookie";
 import { useGetMeQuery } from "./redux/features/auth.api";
 import { getMe } from "./redux/slices/usersSlice";
-import { useAppDispatch, useAppSelector } from "./hooks/useRedux";
-import { IUser } from "./types/root";
+import { useAppDispatch } from "./hooks/useRedux";
 
 const App: React.FC = () => {
   const { data: me } = useGetMeQuery();
@@ -29,7 +28,7 @@ const App: React.FC = () => {
       <Grid
         container
         item
-        sx={{ height: "100vh", bgcolor: "#1B1C21" }}
+        sx={{ height: "100vh" }}
         justifyContent="center"
         alignItems="center"
       >

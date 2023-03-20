@@ -1,17 +1,16 @@
-import React, { useEffect, useState, Suspense, useRef } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Stomp from "stompjs";
 import { Grid } from "@mui/material";
-import { CSSTransition } from "react-transition-group";
 import { useCookies } from "react-cookie";
 
 import { createStompClient } from "src/configs/stomp";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { useAppSelector } from "src/hooks/useRedux";
 
 import Sidebar from "./components/Sidebar";
+import Chat from "./components/Chat";
 
 import "./test.css";
 
-const Chat = React.lazy(() => import("./components/Chat"));
 const Video = React.lazy(() => import("./components/Video"));
 const RoomProfile = React.lazy(() => import("./components/RoomProfile"));
 const CreateRoom = React.lazy(
@@ -79,9 +78,7 @@ const Messenger: React.FC = () => {
             sx={{ overflow: "hidden" }}
             xs={streamStarted || iWatch ? 2.75 : 7.5}
           >
-            <Suspense fallback={<div>Loading...</div>}>
-              <Chat clientSocket={clientSocket} />
-            </Suspense>
+            <Chat clientSocket={clientSocket} />
           </Grid>
           {!streamStarted ? (
             <Grid item xs={2.5}>
@@ -91,21 +88,20 @@ const Messenger: React.FC = () => {
             </Grid>
           ) : null}
         </>
-      ) : (
-        <Grid item xs={9.75}>
-          <Grid
-            container
-            item
-            sx={{ height: "100%" }}
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Suspense fallback={<div>Loading...</div>}>
-              <CreateRoom />
-            </Suspense>
-          </Grid>
+      ) : null}
+      <Grid item xs={9.75}>
+        <Grid
+          container
+          item
+          sx={{ height: "100%" }}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Suspense fallback={<div>Loading...</div>}>
+            <CreateRoom />
+          </Suspense>
         </Grid>
-      )}
+      </Grid>
     </Grid>
   );
 };

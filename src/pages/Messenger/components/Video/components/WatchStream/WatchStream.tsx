@@ -1,23 +1,13 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { useState, useRef } from "react";
 import Stomp from "stompjs";
 import { Grid, Typography } from "@mui/material";
 import { useAppSelector } from "src/hooks/useRedux";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 
-interface MessageHeaders {
-  destination: string;
-}
-
 const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   clientSocket,
 }) => {
+  const [readyToWatch, setReadyWatch] = useState<boolean>(false);
   const [peerConnection, setPeerConnection] =
     useState<RTCPeerConnection | null>(null);
 
@@ -64,15 +54,6 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
     }
   };
 
-  useStompSubscription({
-    roomId,
-    clientSocket,
-    handleSocketMessage,
-    // readyToSubscribe: !!peerConnection,
-    username: me?.username,
-    subscribeOn: "live-stream",
-  });
-
   const connectToStream = async () => {
     if (!peerConnection) {
       const pc = new RTCPeerConnection();
@@ -85,10 +66,8 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
 
       pc.ontrack = (event) => {
         const remoteStream = event.streams[0];
-        if (
-          liveStream.current &&
-          liveStream.current.srcObject !== event.streams[0]
-        ) {
+
+        if (liveStream.current) {
           liveStream.current.srcObject = remoteStream;
         }
       };
@@ -109,9 +88,19 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
         }
       };
 
+      setReadyWatch(true);
       setPeerConnection(pc);
     }
   };
+
+  useStompSubscription({
+    roomId,
+    clientSocket,
+    handleSocketMessage,
+    readyToSubscribe: readyToWatch,
+    username: me?.username,
+    subscribeOn: "live-stream",
+  });
 
   return (
     <Grid container>

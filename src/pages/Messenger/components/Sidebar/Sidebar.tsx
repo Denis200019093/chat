@@ -7,18 +7,16 @@ import Rooms from "./components/Rooms";
 
 const Sidebar: React.FC = () => {
   return (
-    <Grid item sx={{ height: "100vh", bgcolor: "rgba(35,35,35,0.1)" }}>
-      <Grid container justifyContent="center" spacing={2}>
-        <Grid container item xs={11}>
-          <SidebarHeader />
-        </Grid>
-        <Grid item xs={11} sx={{ mb: 2 }}>
-          <SearchRooms />
-        </Grid>
-        <RoomsContainer item>
-          <Rooms />
-        </RoomsContainer>
+    <Grid container item sx={{ bgcolor: "rgb(35,35,35)" }}>
+      <Grid container item>
+        <SidebarHeader />
       </Grid>
+      <Grid container item>
+        <SearchRooms />
+      </Grid>
+      <RoomsContainer item>
+        <Rooms />
+      </RoomsContainer>
     </Grid>
   );
 };
@@ -27,7 +25,7 @@ export default Sidebar;
 
 const RoomsContainer = styled(Grid)({
   overflowY: "auto",
-  height: "calc(100vh - 150px)",
+  height: "calc(100vh - 145px)",
   "&::-webkit-scrollbar": {
     width: "8px",
   },
