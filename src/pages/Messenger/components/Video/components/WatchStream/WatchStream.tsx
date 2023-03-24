@@ -1,103 +1,119 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Stomp from "stompjs";
 import { Grid, Typography } from "@mui/material";
 import { useAppSelector } from "src/hooks/useRedux";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
+import withWatchStream from "src/hocs/withWatchStream";
 
-const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
-  clientSocket,
-}) => {
-  const [readyToWatch, setReadyWatch] = useState<boolean>(false);
+interface IProps {
+  clientSocket: Stomp.Client | null;
+}
+
+const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
+  const [isWatching, setWatching] = React.useState<boolean>(false);
   const [peerConnection, setPeerConnection] =
-    useState<RTCPeerConnection | null>(null);
+    React.useState<RTCPeerConnection | null>(null);
 
-  const liveStream = useRef<HTMLVideoElement>(null);
+  const liveStream = React.useRef<HTMLVideoElement>(null);
+  console.log("da");
 
   const { me } = useAppSelector((state) => state.users);
   const { roomId } = useAppSelector((state) => state.messages);
+  const { isReadyToWatch } = useAppSelector((state) => state.stream);
 
-  const handleSocketMessage = async (message: Stomp.Message) => {
-    const data = JSON.parse(message.body);
+  useEffect(() => {
+    const connectToStream = async () => {
+      try {
+        if (!peerConnection && clientSocket) {
+          const pc = new RTCPeerConnection();
 
-    switch (data.event) {
-      case "offer": {
-        await peerConnection?.setRemoteDescription(
-          new RTCSessionDescription(JSON.parse(message.body).data)
-        );
-
-        if (peerConnection) {
-          const answer = await peerConnection.createAnswer();
-          await peerConnection?.setLocalDescription(
-            new RTCSessionDescription(answer)
-          );
-
-          const messageAnswer = {
-            event: "answer",
-            data: answer,
-            username: me?.username,
-          };
-
-          clientSocket?.send(
+          clientSocket.send(
             `/chatrooms/${roomId}/streamer`,
             {},
-            JSON.stringify(messageAnswer)
+            JSON.stringify({ username: me?.username, event: "connect" })
           );
-        }
-        break;
-      }
-      case "candidate": {
-        await peerConnection?.addIceCandidate(
-          new RTCIceCandidate(JSON.parse(message.body).data)
-        );
-        break;
-      }
-    }
-  };
 
-  const connectToStream = async () => {
-    if (!peerConnection) {
-      const pc = new RTCPeerConnection();
+          pc.ontrack = (event) => {
+            const remoteStream = event.streams[0];
 
-      clientSocket?.send(
-        `/chatrooms/${roomId}/streamer`,
-        {},
-        JSON.stringify({ username: me?.username, event: "connect" })
-      );
-
-      pc.ontrack = (event) => {
-        const remoteStream = event.streams[0];
-
-        if (liveStream.current) {
-          liveStream.current.srcObject = remoteStream;
-        }
-      };
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          const messageCandidate = {
-            event: "candidate",
-            data: event.candidate,
-            username: me?.username,
+            if (liveStream.current) {
+              liveStream.current.srcObject = remoteStream;
+            }
           };
 
-          clientSocket?.send(
-            `/chatrooms/${roomId}/streamer`,
-            {},
-            JSON.stringify(messageCandidate)
-          );
-        }
-      };
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              const messageCandidate = {
+                event: "candidate",
+                data: event.candidate,
+                username: me?.username,
+              };
 
-      setReadyWatch(true);
-      setPeerConnection(pc);
-    }
-  };
+              clientSocket?.send(
+                `/chatrooms/${roomId}/streamer`,
+                {},
+                JSON.stringify(messageCandidate)
+              );
+            }
+          };
+
+          setWatching(true);
+          setPeerConnection(pc);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (isReadyToWatch) connectToStream();
+  }, [clientSocket, isReadyToWatch, me?.username, peerConnection, roomId]);
+
+  const handleSocketMessage = React.useCallback(
+    async (message: Stomp.Message) => {
+      const data = JSON.parse(message.body);
+
+      switch (data.event) {
+        case "offer": {
+          await peerConnection?.setRemoteDescription(
+            new RTCSessionDescription(JSON.parse(message.body).data)
+          );
+
+          if (peerConnection) {
+            const answer = await peerConnection.createAnswer();
+            await peerConnection?.setLocalDescription(
+              new RTCSessionDescription(answer)
+            );
+
+            const messageAnswer = {
+              event: "answer",
+              data: answer,
+              username: me?.username,
+            };
+
+            clientSocket?.send(
+              `/chatrooms/${roomId}/streamer`,
+              {},
+              JSON.stringify(messageAnswer)
+            );
+          }
+          break;
+        }
+        case "candidate": {
+          await peerConnection?.addIceCandidate(
+            new RTCIceCandidate(JSON.parse(message.body).data)
+          );
+          break;
+        }
+      }
+    },
+    [clientSocket, me?.username, peerConnection, roomId]
+  );
 
   useStompSubscription({
     roomId,
     clientSocket,
     handleSocketMessage,
-    readyToSubscribe: readyToWatch,
+    readyToSubscribe: isWatching,
     username: me?.username,
     subscribeOn: "live-stream",
   });
@@ -105,7 +121,7 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   return (
     <Grid container>
       <Grid>
-        <button onClick={connectToStream}>Watch stream</button>
+        {/* <button onClick={() => connectToStream()}>Watch stream</button> */}
       </Grid>
       <Grid container item>
         <Typography>Live stream</Typography>
@@ -120,4 +136,6 @@ const WatchStream: React.FC<{ clientSocket: Stomp.Client | null }> = ({
   );
 };
 
-export default WatchStream;
+export default withWatchStream(WatchStream);
+
+// export const Test = withWatchStream(WatchStream);

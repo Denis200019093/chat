@@ -28,7 +28,7 @@ const App: React.FC = () => {
       <Grid
         container
         item
-        sx={{ height: "100vh" }}
+        sx={{ height: "100vh", bgcolor: 'rgba(35,35,35,1)' }}
         justifyContent="center"
         alignItems="center"
       >

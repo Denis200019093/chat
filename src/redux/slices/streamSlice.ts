@@ -1,30 +1,42 @@
-import Stomp from "stompjs";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IState {
-  clientSocket: Stomp.Client | null;
-  peerConnections: { [username: string]: RTCPeerConnection };
-  iWatch: boolean;
+  isReadyToWatch: boolean;
+  isReadyToStream: boolean;
+  isWatching: boolean;
 }
 
 const initialState: IState = {
-  clientSocket: null,
-  peerConnections: {},
-  iWatch: false,
+  isReadyToWatch: false,
+  isReadyToStream: false,
+  isWatching: false,
 };
 
 const streamSlice = createSlice({
   name: "stream",
   initialState,
   reducers: {
-    setClientSocket(state, action: PayloadAction<Stomp.Client>) {
-      state.clientSocket = action.payload;
+    setReadyWatch(state) {
+      state.isReadyToWatch = true;
+      state.isReadyToStream = false;
     },
-    setWatch(state) {
-      state.iWatch = true;
+    unsetReadyWatch(state) {
+      state.isReadyToWatch = false;
+    },
+    setReadyStream(state) {
+      state.isReadyToStream = true;
+      state.isReadyToWatch = false;
+    },
+    unsetReadyStream(state) {
+      state.isReadyToStream = false;
     },
   },
 });
 
-export const { setWatch, setClientSocket } = streamSlice.actions;
+export const {
+  setReadyWatch,
+  unsetReadyWatch,
+  setReadyStream,
+  unsetReadyStream,
+} = streamSlice.actions;
 export const streamReducer = streamSlice.reducer;

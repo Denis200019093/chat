@@ -19,6 +19,7 @@ import { CreateRoomData } from "src/types/root";
 import { TransitionProps } from "@mui/material/transitions";
 import { hideCreateRoomModal } from "src/redux/slices/modesSlice";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import CustomInput from "src/components/CustomInput";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -55,14 +56,14 @@ const CreateRoomForm: React.FC<{
         <Grid item>
           <Grid container spacing={2}>
             <Grid container item>
-              <TextField
+              <CustomInput
                 fullWidth
                 {...register("name", { required: true })}
-                placeholder="Room name"
+                placeholder="Title"
               />
             </Grid>
             <Grid container item>
-              <TextField
+              <CustomInput
                 fullWidth
                 {...register("description", { required: true })}
                 placeholder="Description"

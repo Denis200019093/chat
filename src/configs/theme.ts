@@ -1,6 +1,29 @@
 import { createTheme, responsiveFontSizes } from "@mui/material";
 
 export let theme = createTheme({
+  // components: {
+  //   MuiTextField: {
+  //     variants: [
+  //       {
+  //         props: { variant: "outlined" },
+  //         style: {
+  //           color: "rgba(35,35,35,1)",
+  //           label: {
+  //             zIndex: 5,
+  //           },
+  //           input: {
+  //             backgroundColor: "rgb(40,40,40)",
+  //             color: "rgba(255,255,255,0.8)",
+  //             borderRadius: "5px",
+  //           },
+  //           fieldset: {
+  //             display: "none",
+  //           },
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
   // palette: {
   //   primary: {
   //   }

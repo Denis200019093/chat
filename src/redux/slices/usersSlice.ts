@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUser } from "src/types/root";
+import { IUser, IUserRoom } from "src/types/root";
 
 interface IState {
-  activeUsers: string[];
+  activeUsers: IUserRoom[];
   me: IUser | null;
 }
 
@@ -18,18 +18,20 @@ const usersSlice = createSlice({
     getMe(state, action: PayloadAction<IUser>) {
       state.me = action.payload;
     },
-    getActiveUsers(state, action: PayloadAction<string[]>) {
+    getActiveUsers(state, action: PayloadAction<IUserRoom[]>) {
       state.activeUsers = action.payload;
     },
-    localSetActiveUser(state, action: PayloadAction<string>) {
-      const newUser = action.payload;
-      if (!state.activeUsers.includes(newUser)) {
+    localSetActiveUser(state, action: PayloadAction<IUserRoom>) {
+      const foundUser = state.activeUsers.find(
+        (item) => item.username === action.payload.username
+      );
+      if (foundUser && !state.activeUsers.includes(foundUser)) {
         state.activeUsers = state.activeUsers.concat(action.payload);
       }
     },
-    localDeleteActiveUser(state, action: PayloadAction<string>) {
+    localDeleteActiveUser(state, action: PayloadAction<IUserRoom>) {
       state.activeUsers = state.activeUsers.filter(
-        (user) => user !== action.payload
+        (user) => user.username !== action.payload.username
       );
     },
   },

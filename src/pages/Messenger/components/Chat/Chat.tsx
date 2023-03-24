@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import Stomp from "stompjs";
 import { StompSubscription } from "@stomp/stompjs";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 
 import ChatHeader from "./components/ChatHeader";
 import SendMessageBar from "./components/SendMessageBar";
@@ -17,15 +17,20 @@ import {
   localSetActiveUser,
 } from "src/redux/slices/usersSlice";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
+import useScrollBottom from "src/hooks/useScrollBottom";
 
 interface MessageHeaders {
   "event-type": string;
 }
 
-const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
-  clientSocket,
-}) => {
+interface IProps {
+  clientSocket: Stomp.Client | null;
+  setShowRoomProfile: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Chat: React.FC<IProps> = ({ clientSocket, setShowRoomProfile }) => {
   const { roomId } = useAppSelector((state) => state.messages);
+
   const dispatch = useAppDispatch();
 
   const handleSocketMessage = useCallback(
@@ -82,9 +87,9 @@ const Chat: React.FC<{ clientSocket: Stomp.Client | null }> = ({
       }}
     >
       <Grid container item sx={{ flexShrink: 0, height: "65px" }}>
-        <ChatHeader />
+        <ChatHeader setShowRoomProfile={setShowRoomProfile} />
       </Grid>
-      <Grid item xs sx={{ overflowY: "auto" }}>
+      <Grid item xs>
         <Messages />
       </Grid>
       <Grid item sx={{ flexShrink: 0 }}>

@@ -6,12 +6,17 @@ export interface IUser {
 }
 
 // Room fields
+export interface IUserRoom {
+  username: string;
+  userStreaming: boolean;
+}
+
 export interface IRoom {
   id: number;
   name: string;
   description: string;
   streamOn: boolean;
-  users: string[];
+  users: IUserRoom[];
 }
 
 // Message fields

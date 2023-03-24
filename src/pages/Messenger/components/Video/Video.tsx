@@ -19,11 +19,11 @@ const Video: React.FC<{ clientSocket: Stomp.Client | null }> = ({
           <StartStream clientSocket={clientSocket} />
         </Grid>
       ) : null}
-      {iWatch && (
+      {/* {iWatch && (
         <Grid item xs={12}>
           <WatchStream clientSocket={clientSocket} />
         </Grid>
-      )}
+      )} */}
     </Grid>
   );
 };

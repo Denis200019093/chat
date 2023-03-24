@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useEffect, useRef } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
 
@@ -39,22 +39,6 @@ const useStompSubscription = ({
     default:
       break;
   }
-
-  // const urlSubscribe = useMemo(() => {
-  //   switch (subscribeOn) {
-  //     case "chat": {
-  //       return `/chatrooms/${roomId}`;
-  //     }
-  //     case "my-stream": {
-  //       return `/chatrooms/${roomId}/streamer`;
-  //     }
-  //     case "live-stream": {
-  //       return `/chatrooms/${roomId}/viewer/${username}`;
-  //     }
-  //     default:
-  //       return "";
-  //   }
-  // }, [roomId, subscribeOn, username]);
 
   useEffect(() => {
     if (clientSocket && subscribeOn && readyToSubscribe) {

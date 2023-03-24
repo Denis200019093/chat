@@ -1,18 +1,21 @@
 import React from "react";
 import { Grid, styled } from "@mui/material";
 
-import SearchRooms from "./components/SearchRooms";
 import SidebarHeader from "./components/SidebarHeader";
 import Rooms from "./components/Rooms";
+import CustomInput from "src/components/CustomInput";
 
 const Sidebar: React.FC = () => {
   return (
-    <Grid container item sx={{ bgcolor: "rgb(35,35,35)" }}>
-      <Grid container item>
+    <Grid
+      container
+      item
+      sx={{ bgcolor: "rgb(35,35,35)" }}
+      justifyContent="center"
+    >
+      <Grid container item xs={11}>
         <SidebarHeader />
-      </Grid>
-      <Grid container item>
-        <SearchRooms />
+        <CustomInput placeholder="Search" fullWidth />
       </Grid>
       <RoomsContainer item>
         <Rooms />

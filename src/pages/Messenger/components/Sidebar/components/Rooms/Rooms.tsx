@@ -5,6 +5,10 @@ import MultiLineText from "src/components/MultiLineText";
 import { useGetRoomsQuery } from "src/redux/features/chatRooms.api";
 import { getRoomId } from "src/redux/slices/roomSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
+import {
+  unsetReadyStream,
+  unsetReadyWatch,
+} from "src/redux/slices/streamSlice";
 
 const Rooms: React.FC = () => {
   const { data: rooms } = useGetRoomsQuery();
@@ -13,6 +17,8 @@ const Rooms: React.FC = () => {
 
   const joinRoom = (roomId: number) => {
     dispatch(getRoomId(roomId));
+    dispatch(unsetReadyStream());
+    dispatch(unsetReadyWatch());
   };
 
   return (

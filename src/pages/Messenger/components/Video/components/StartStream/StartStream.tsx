@@ -4,6 +4,10 @@ import { Button, Grid, Typography } from "@mui/material";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppSelector } from "src/hooks/useRedux";
+import {
+  useLazyEndStreamQuery,
+  useLazyStartStreamQuery,
+} from "src/redux/features/stream.api";
 
 interface IProps {
   clientSocket: Stomp.Client | null;
@@ -11,38 +15,49 @@ interface IProps {
 
 const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [readyToStream, setReadyStream] = useState<boolean>(false);
+  const [isStreaming, setStreaming] = useState<boolean>(false);
   const [peerConnections, setPeerConnections] = useState<{
     [username: string]: RTCPeerConnection;
   }>({});
 
-  const currentStream = useRef<HTMLVideoElement>(null);
-
+  const [startStream] = useLazyStartStreamQuery();
+  const [endStream] = useLazyEndStreamQuery();
   const { roomId } = useAppSelector((state) => state.messages);
 
-  const startStream = async () => {
+  const currentStream = useRef<HTMLVideoElement>(null);
+
+  const handleStartStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
 
+      await startStream(roomId);
+
       if (currentStream.current && stream) {
         currentStream.current.srcObject = stream;
         setStream(stream);
-        setReadyStream(!!stream);
+        setStreaming(true);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const stopStream = () => {
-    stream?.getTracks().forEach((track) => {
-      track.stop();
-    });
-    setStream(null);
-    setReadyStream(false);
+  const handleStopStream = async () => {
+    try {
+      stream?.getTracks().forEach((track) => {
+        track.stop();
+      });
+      const res = await endStream();
+      console.log(res);
+
+      setStream(null);
+      setStreaming(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const createConnectionStream = useCallback(
@@ -51,73 +66,77 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
         return;
       }
 
-      const peerConnection = new RTCPeerConnection();
+      try {
+        const peerConnection = new RTCPeerConnection();
 
-      setPeerConnections((prevPeerConnections) => ({
-        ...prevPeerConnections,
-        [username]: peerConnection,
-      }));
+        setPeerConnections((prevPeerConnections) => ({
+          ...prevPeerConnections,
+          [username]: peerConnection,
+        }));
 
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          const messageCandidate = {
-            event: "candidate",
-            data: event.candidate,
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            const messageCandidate = {
+              event: "candidate",
+              data: event.candidate,
+            };
+
+            clientSocket.send(
+              `/chatrooms/${roomId}/viewer/${username}`,
+              {},
+              JSON.stringify(messageCandidate)
+            );
+          }
+        };
+
+        peerConnection.onnegotiationneeded = async () => {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          const messageOffer = {
+            event: "offer",
+            data: offer,
           };
 
           clientSocket.send(
             `/chatrooms/${roomId}/viewer/${username}`,
             {},
-            JSON.stringify(messageCandidate)
+            JSON.stringify(messageOffer)
           );
-        }
-      };
-
-      peerConnection.onnegotiationneeded = async () => {
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        const messageOffer = {
-          event: "offer",
-          data: offer,
         };
 
-        clientSocket.send(
-          `/chatrooms/${roomId}/viewer/${username}`,
-          {},
-          JSON.stringify(messageOffer)
-        );
-      };
+        peerConnection.onconnectionstatechange = () => {
+          const connectionState = peerConnection.connectionState;
 
-      peerConnection.onconnectionstatechange = () => {
-        const connectionState = peerConnection.connectionState;
+          if (connectionState === "disconnected") {
+            // setPeerConnections((prev) => {
+            //   const { [username]: deletedConnection, ...remainingConnections } = prev;
+            //   return { ...prev, peerConnections: remainingConnections };
+            // });
 
-        if (connectionState === "disconnected") {
-          // setPeerConnections((prev) => {
-          //   const { [username]: deletedConnection, ...remainingConnections } = prev;
-          //   return { ...prev, peerConnections: remainingConnections };
-          // });
+            const { username, ...newState } = peerConnections;
+            setPeerConnections(newState);
 
-          const { username, ...newState } = peerConnections;
-          setPeerConnections(newState);
+            // setPeerConnections(prevState => {
+            //   const {[username]: peerConnection, ...rest} = prevState;
+            //   return rest;
+            // });
 
-          // setPeerConnections(prevState => {
-          //   const {[username]: peerConnection, ...rest} = prevState;
-          //   return rest;
-          // });
+            // setPeerConnections((prev) => delete prev[username]);
+          }
+        };
 
-          // setPeerConnections((prev) => delete prev[username]);
-        }
-      };
-
-      stream?.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, stream);
-      });
+        stream?.getTracks().forEach((track) => {
+          peerConnection.addTrack(track, stream);
+        });
+      } catch (error) {
+        console.log(error);
+      }
     },
     [clientSocket, peerConnections, roomId, stream]
   );
 
-  const handleSocketMessage = useCallback(
-    async (message: Stomp.Message) => {
+  const handleSocketMessage = async (message: Stomp.Message) => {
+    try {
       const data = JSON.parse(message.body);
 
       switch (data.event) {
@@ -149,14 +168,15 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           break;
         }
       }
-    },
-    [createConnectionStream, peerConnections]
-  );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useStompSubscription({
     roomId,
     clientSocket,
-    readyToSubscribe: readyToStream,
+    readyToSubscribe: isStreaming,
     handleSocketMessage,
     subscribeOn: "my-stream",
   });
@@ -172,7 +192,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
       <Button
         size="large"
         sx={{ mt: 5 }}
-        onClick={() => (stream ? stopStream() : startStream())}
+        onClick={() => (stream ? handleStopStream() : handleStartStream())}
         variant="contained"
       >
         {stream ? "Stop" : "Start"} stream

@@ -8,25 +8,32 @@ import { useAppSelector } from "src/hooks/useRedux";
 
 import Sidebar from "./components/Sidebar";
 import Chat from "./components/Chat";
+// import WatchStream from "./components/Video/components/WatchStream";
 
 import "./test.css";
+// import { Test } from "./components/Video/components/WatchStream/WatchStream";
 
 const Video = React.lazy(() => import("./components/Video"));
+const StartStream = React.lazy(
+  () => import("./components/Video/components/StartStream")
+);
+const WatchStream = React.lazy(
+  () => import("./components/Video/components/WatchStream")
+);
 const RoomProfile = React.lazy(() => import("./components/RoomProfile"));
 const CreateRoom = React.lazy(
   () => import("./components/Chat/components/CreateRoom")
 );
 
 const Messenger: React.FC = () => {
+  const [showRoomProfile, setShowRoomProfile] = useState<boolean>(false);
   const [clientSocket, setClientSocket] = useState<Stomp.Client | null>(null);
 
-  const nodeRef = React.useRef<HTMLDivElement>(null);
-
   const [cookies] = useCookies(["token"]);
-
   const { roomId } = useAppSelector((state) => state.messages);
-  const { streamStarted } = useAppSelector((state) => state.modes);
-  const { iWatch } = useAppSelector((state) => state.stream);
+  const { isReadyToWatch, isReadyToStream } = useAppSelector(
+    (state) => state.stream
+  );
 
   useEffect(() => {
     const stompClient = createStompClient();
@@ -60,13 +67,20 @@ const Messenger: React.FC = () => {
 
   return (
     <Grid container sx={{ overflow: "hidden", height: "100vh" }}>
-      <Grid item xs={2}>
+      <Grid container item xs={2}>
         <Sidebar />
       </Grid>
-      <Grid ref={nodeRef} item xs={streamStarted || iWatch ? 7.25 : 0}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Video clientSocket={clientSocket} />
-        </Suspense>
+      <Grid item xs={isReadyToStream || isReadyToWatch ? 7.25 : 0}>
+        {isReadyToStream && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <StartStream clientSocket={clientSocket} />
+          </Suspense>
+        )}
+        {isReadyToWatch && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <WatchStream clientSocket={clientSocket} />
+          </Suspense>
+        )}
       </Grid>
       {roomId ? (
         <>
@@ -76,20 +90,25 @@ const Messenger: React.FC = () => {
             justifyContent="center"
             alignItems="center"
             sx={{ overflow: "hidden" }}
-            xs={streamStarted || iWatch ? 2.75 : 7.5}
+            xs={isReadyToStream || isReadyToWatch ? 2.75 : 7.5}
           >
-            <Chat clientSocket={clientSocket} />
+            <Chat
+              clientSocket={clientSocket}
+              setShowRoomProfile={setShowRoomProfile}
+            />
           </Grid>
-          {!streamStarted ? (
-            <Grid item xs={2.5}>
-              <Suspense fallback={<div>Loading...</div>}>
-                <RoomProfile />
-              </Suspense>
-            </Grid>
-          ) : null}
+          <Grid item xs={2.5}>
+            <Suspense fallback={<div>Loading...</div>}>
+              <RoomProfile
+                clientSocket={clientSocket}
+                showRoomProfile={showRoomProfile}
+                setShowRoomProfile={setShowRoomProfile}
+              />
+            </Suspense>
+          </Grid>
         </>
       ) : null}
-      <Grid item xs={9.75}>
+      {/* <Grid item xs={9.75}>
         <Grid
           container
           item
@@ -101,7 +120,7 @@ const Messenger: React.FC = () => {
             <CreateRoom />
           </Suspense>
         </Grid>
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 };

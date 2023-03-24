@@ -1,31 +1,21 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Avatar, Button, Grid } from "@mui/material";
 
-import { offDefaultMode, onDefaultMode } from "src/redux/slices/modesSlice";
+import Diversity1Icon from "@mui/icons-material/Diversity1";
+
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { useLazyChangeStreamStateQuery } from "src/redux/features/chatRooms.api";
-import { setWatch } from "src/redux/slices/streamSlice";
+import { setReadyStream } from "src/redux/slices/streamSlice";
 
-const ChatHeader: React.FC = () => {
-  const { roomId } = useAppSelector((state) => state.messages);
-  const { iWatch } = useAppSelector((state) => state.stream);
+interface IProps {
+  setShowRoomProfile: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-  const [changeStreamState] = useLazyChangeStreamStateQuery();
+const ChatHeader: React.FC<IProps> = ({ setShowRoomProfile }) => {
+  const { isReadyToStream, isReadyToWatch } = useAppSelector(
+    (state) => state.stream
+  );
 
   const dispatch = useAppDispatch();
-
-  const openVideo = () => dispatch(onDefaultMode());
-  const closeVideo = () => dispatch(offDefaultMode());
-
-  const makeCall = async () => {
-    try {
-      // const stream = await navigator.mediaDevices.getDisplayMedia();
-      // dispatch(setStream(stream));
-      openVideo();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <Grid
@@ -44,30 +34,25 @@ const ChatHeader: React.FC = () => {
         justifyContent="space-between"
       >
         <Grid item>
-          <Grid item>
-            <Avatar sx={{ width: 30, height: 30 }} />
-          </Grid>
+          <Avatar sx={{ width: 30, height: 30 }} />
         </Grid>
         <Grid item sx={{ mr: 1 }}>
-          {/* {streamIsOn ? (
-            <Button onClick={closeVideo} variant="contained" color="secondary">
-              Stop
+          <Grid container alignItems="center">
+            <Button
+              onClick={() => dispatch(setReadyStream())}
+              variant="contained"
+              color="secondary"
+            >
+              Live
             </Button>
-          ) : ( */}
-          <Button onClick={makeCall} variant="contained" color="secondary">
-            Live
-          </Button>
-          <Button
-            onClick={() => {
-              dispatch(setWatch());
-              // openVideo();
-            }}
-            variant="contained"
-            color="secondary"
-          >
-            Watch
-          </Button>
-          {/* )} */}
+
+            {isReadyToStream || isReadyToWatch ? (
+              <Diversity1Icon
+                sx={{ ml: 2 }}
+                onClick={() => setShowRoomProfile(true)}
+              />
+            ) : null}
+          </Grid>
         </Grid>
       </Grid>
     </Grid>

@@ -1,16 +1,15 @@
 import React, { useEffect } from "react";
-import { Grid, styled } from "@mui/material";
+import { Button, Grid, styled } from "@mui/material";
 
 import Message from "./components/Message";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
 import { getMessages } from "src/redux/slices/roomSlice";
+import useScrollBottom from "src/hooks/useScrollBottom";
 
 const Messages: React.FC = () => {
   const { messages, roomId } = useAppSelector((state) => state.messages);
-
-  const dispatch = useAppDispatch();
-
+  const { ref, scrollToBottom } = useScrollBottom();
   const { data: receivedMessages = { content: [] } } = useGetMessagesQuery(
     roomId,
     {
@@ -19,6 +18,8 @@ const Messages: React.FC = () => {
     }
   );
 
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
     if (receivedMessages && receivedMessages.content.length) {
       dispatch(getMessages(receivedMessages.content));
@@ -26,7 +27,7 @@ const Messages: React.FC = () => {
   }, [dispatch, receivedMessages, receivedMessages.content]);
 
   return (
-    <ChatContainer container item justifyContent="center">
+    <ChatContainer ref={ref} container item justifyContent="center">
       <Grid container item xs={11}>
         {messages.map((message) => (
           <Message key={message.id} message={message} />

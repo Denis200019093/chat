@@ -1,8 +1,10 @@
 import React, { useCallback } from "react";
-import { Grid, Button, TextField, Typography } from "@mui/material";
+import { Grid, Button, TextField, Typography, Paper } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
+import BgLogin from "../../assets/subtle-prism.svg";
+import Bg from "../../assets/protruding-squares.svg";
 import { AuthData } from "src/types/root";
 import { useSignInMutation } from "src/redux/features/auth.api";
 import {
@@ -51,39 +53,52 @@ const Login: React.FC = () => {
         }
       }
     },
-    [dispatch, navigate, setCookie, signIn]
+    [navigate, setCookie, signIn]
   );
 
   return (
-    <Grid container justifyContent="center">
+    <Grid container item justifyContent="center">
       <Grid
         item
         xs={8}
         md={3}
-        sx={{ bgcolor: "lightblue", p: 3, borderRadius: "10px" }}
+        sx={{
+          p: 3,
+          borderRadius: "10px",
+          // transform: "translate3d(0, -50%, 35px) perspective(100px)",
+          // backgroundImage: `url(${BgLogin})`,
+        }}
       >
         <form onSubmit={handleSubmit(submitLogin)}>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             <Grid container item justifyContent="center">
               <Typography variant="h4">Login</Typography>
             </Grid>
-            <Grid container item>
-              <TextField
-                fullWidth
-                {...register("username")}
-                placeholder="Username"
-              />
-            </Grid>
-            <Grid container item>
-              <TextField
-                fullWidth
-                {...register("password")}
-                placeholder="Password"
-                type="password"
-              />
+            <Grid container item spacing={2}>
+              <Grid container item>
+                <TextField
+                  fullWidth
+                  {...register("username")}
+                  // label="Username"
+                  placeholder="Username"
+                />
+              </Grid>
+              <Grid container item>
+                <TextField
+                  fullWidth
+                  {...register("password")}
+                  placeholder="Password"
+                  type="password"
+                />
+              </Grid>
             </Grid>
             <Grid container item justifyContent="center">
-              <Button disabled={isLoading} variant="contained" type="submit">
+              <Button
+                disabled={isLoading}
+                variant="contained"
+                type="submit"
+                size="large"
+              >
                 Sign in
               </Button>
             </Grid>
