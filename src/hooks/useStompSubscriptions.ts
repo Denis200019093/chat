@@ -21,19 +21,19 @@ const useStompSubscription = ({
 }: UseStompSubscriptionParams) => {
   const subscriptionRef = useRef<StompSubscription | null>(null);
 
-  let urlSubscribe = "";
+  let destination = "";
 
   switch (subscribeOn) {
     case "chat": {
-      urlSubscribe = `/chatrooms/${roomId}`;
+      destination = `/chatrooms/${roomId}`;
       break;
     }
     case "my-stream": {
-      urlSubscribe = `/chatrooms/${roomId}/streamer`;
+      destination = `/chatrooms/${roomId}/streamer`;
       break;
     }
     case "live-stream": {
-      urlSubscribe = `/chatrooms/${roomId}/viewer/${username}`;
+      destination = `/chatrooms/${roomId}/viewer/${username}`;
       break;
     }
     default:
@@ -54,8 +54,9 @@ const useStompSubscription = ({
       readyToSubscribe
     ) {
       subscriptionRef.current = clientSocket.subscribe(
-        urlSubscribe,
-        handleSocketMessage
+        destination,
+        handleSocketMessage,
+        {'id' : destination}
       );
     }
 
@@ -76,7 +77,7 @@ const useStompSubscription = ({
     handleSocketMessage,
     readyToSubscribe,
     subscribeOn,
-    urlSubscribe,
+    destination,
   ]);
 };
 
