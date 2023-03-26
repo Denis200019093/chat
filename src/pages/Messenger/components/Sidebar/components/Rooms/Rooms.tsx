@@ -5,6 +5,7 @@ import MultiLineText from "src/components/MultiLineText";
 import { useGetRoomsQuery } from "src/redux/features/chatRooms.api";
 import { getRoomId } from "src/redux/slices/roomSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
+import { showRoomProfile } from "src/redux/slices/modesSlice";
 import {
   unsetReadyStream,
   unsetReadyWatch,
@@ -19,6 +20,7 @@ const Rooms: React.FC = () => {
     dispatch(getRoomId(roomId));
     dispatch(unsetReadyStream());
     dispatch(unsetReadyWatch());
+    dispatch(showRoomProfile());
   };
 
   return (

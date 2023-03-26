@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
 import {
-  Avatar,
   Grid,
   Tooltip,
   Typography,
   styled,
-  Button,
   Menu,
   IconButton,
   MenuItem,
@@ -13,10 +11,10 @@ import {
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
+import useHover from "src/hooks/useHover";
 import { useDeleteMessageMutation } from "src/redux/features/messages.api";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { startEdit } from "src/redux/slices/roomSlice";
-import useHover from "src/hooks/useHover";
+import { startEdit } from "src/redux/slices/messagesSlice";
 import { IMessage } from "src/types/root";
 
 const ITEM_HEIGHT = 48;

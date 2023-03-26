@@ -1,14 +1,17 @@
 import React, { useEffect } from "react";
-import { Button, Grid, styled } from "@mui/material";
+import { Button, Collapse, Grid, styled } from "@mui/material";
 
+import useScrollBottom from "src/hooks/useScrollBottom";
 import Message from "./components/Message";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import { getMessages } from "src/redux/slices/roomSlice";
-import useScrollBottom from "src/hooks/useScrollBottom";
+import { getMessages } from "src/redux/slices/messagesSlice";
+import { TransitionGroup } from "react-transition-group";
 
 const Messages: React.FC = () => {
-  const { messages, roomId } = useAppSelector((state) => state.messages);
+  const { messages } = useAppSelector((state) => state.messages);
+  const { roomId } = useAppSelector((state) => state.room);
+
   const { ref, scrollToBottom } = useScrollBottom();
   const { data: receivedMessages = { content: [] } } = useGetMessagesQuery(
     roomId,
@@ -27,11 +30,15 @@ const Messages: React.FC = () => {
   }, [dispatch, receivedMessages, receivedMessages.content]);
 
   return (
-    <ChatContainer ref={ref} container item justifyContent="center">
-      <Grid container item xs={11}>
-        {messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
+    <ChatContainer ref={ref} container item sx={{ height: "100%" }} justifyContent="center" alignItems="flex-end">
+      <Grid container item  xs={11}>
+        <TransitionGroup style={{ width: "100%" }}>
+          {messages.map((message) => (
+            <Collapse key={message.id}>
+              <Message message={message} />
+            </Collapse>
+          ))}
+        </TransitionGroup>
       </Grid>
     </ChatContainer>
   );

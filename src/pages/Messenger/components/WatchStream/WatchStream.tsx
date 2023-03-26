@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import Stomp from "stompjs";
 import { Grid, Typography } from "@mui/material";
 import { useAppSelector } from "src/hooks/useRedux";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import withWatchStream from "src/hocs/withWatchStream";
 
 interface IProps {
   clientSocket: Stomp.Client | null;
@@ -14,20 +13,19 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
   const [peerConnection, setPeerConnection] =
     React.useState<RTCPeerConnection | null>(null);
 
-  const liveStream = React.useRef<HTMLVideoElement>(null);
-  console.log("da");
-
   const { me } = useAppSelector((state) => state.users);
-  const { roomId } = useAppSelector((state) => state.messages);
+  const { roomId } = useAppSelector((state) => state.room);
   const { isReadyToWatch } = useAppSelector((state) => state.stream);
+
+  const liveStream = React.useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const connectToStream = async () => {
       try {
-        if (!peerConnection && clientSocket) {
+        if (!peerConnection) {
           const pc = new RTCPeerConnection();
 
-          clientSocket.send(
+          clientSocket?.send(
             `/chatrooms/${roomId}/streamer`,
             {},
             JSON.stringify({ username: me?.username, event: "connect" })
@@ -74,13 +72,13 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
 
       switch (data.event) {
         case "offer": {
-          await peerConnection?.setRemoteDescription(
-            new RTCSessionDescription(JSON.parse(message.body).data)
-          );
-
           if (peerConnection) {
-            const answer = await peerConnection.createAnswer();
-            await peerConnection?.setLocalDescription(
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(JSON.parse(message.body).data)
+            );
+
+            const answer = await peerConnection?.createAnswer();
+            await peerConnection.setLocalDescription(
               new RTCSessionDescription(answer)
             );
 
@@ -99,9 +97,11 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
           break;
         }
         case "candidate": {
-          await peerConnection?.addIceCandidate(
-            new RTCIceCandidate(JSON.parse(message.body).data)
-          );
+          if (peerConnection) {
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(JSON.parse(message.body).data)
+            );
+          }
           break;
         }
       }
@@ -120,22 +120,15 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
 
   return (
     <Grid container>
-      <Grid>
-        {/* <button onClick={() => connectToStream()}>Watch stream</button> */}
-      </Grid>
-      <Grid container item>
-        <Typography>Live stream</Typography>
-        <video
-          controls
-          style={{ height: "100%", width: "100%" }}
-          autoPlay
-          ref={liveStream}
-        />
-      </Grid>
+      <Typography>Live stream</Typography>
+      <video
+        controls
+        style={{ height: "100%", width: "100%" }}
+        autoPlay
+        ref={liveStream}
+      />
     </Grid>
   );
 };
 
-export default withWatchStream(WatchStream);
-
-// export const Test = withWatchStream(WatchStream);
+export default WatchStream;

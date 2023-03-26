@@ -1,10 +1,11 @@
 import React, { forwardRef } from "react";
 import { RefCallBack } from "react-hook-form";
 import TextField, { BaseTextFieldProps } from "@mui/material/TextField";
-import { styled } from "@mui/material";
+import { InputProps, styled } from "@mui/material";
 
 interface IProps extends BaseTextFieldProps {
   suggestions?: boolean; // Default browser autocomplete
+  // InputProps?: InputProps;
 }
 
 const CustomInput = forwardRef<RefCallBack, IProps>(

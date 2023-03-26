@@ -85,23 +85,23 @@ const CreateRoom: React.FC = () => {
   const [createRoom, { isLoading }] = useCreateRoomMutation();
 
   const { creatingRoom } = useAppSelector((state) => state.modes);
+  const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
 
   const hideDialog = () => dispatch(hideCreateRoomModal());
 
-  if (creatingRoom) {
+  if (creatingRoom || roomId) {
     return (
       <Dialog
         open={creatingRoom}
         TransitionComponent={Transition}
         keepMounted
         onClose={hideDialog}
-        aria-describedby="alert-dialog-slide-description"
       >
         <CreateRoomContainer>
           <DialogContent>
-            <Grid container item spacing={2}>
+            <Grid container justifyContent="center">
               <CreateRoomForm onSubmit={createRoom} isLoading={isLoading} />
             </Grid>
           </DialogContent>
@@ -122,5 +122,4 @@ export default CreateRoom;
 const CreateRoomContainer = styled(Grid)({
   backgroundColor: "rgb(35,35,35)",
   padding: "24px",
-  borderRadius: "6px",
 });

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Stomp from "stompjs";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { useAppSelector } from "src/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import {
   useLazyEndStreamQuery,
   useLazyStartStreamQuery,
 } from "src/redux/features/stream.api";
+import { setStreamId, unsetReadyStream } from "src/redux/slices/streamSlice";
+import { showRoomProfile } from "src/redux/slices/modesSlice";
 
 interface IProps {
   clientSocket: Stomp.Client | null;
@@ -22,9 +24,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
   const [startStream] = useLazyStartStreamQuery();
   const [endStream] = useLazyEndStreamQuery();
-  const { roomId } = useAppSelector((state) => state.messages);
+  const { roomId } = useAppSelector((state) => state.room);
+  const { isReadyToStream } = useAppSelector((state) => state.stream);
 
   const currentStream = useRef<HTMLVideoElement>(null);
+
+  const dispatch = useAppDispatch();
 
   const handleStartStream = async () => {
     try {
@@ -39,33 +44,38 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
         currentStream.current.srcObject = stream;
         setStream(stream);
         setStreaming(true);
+        dispatch(setStreamId(stream.id));
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleStopStream = async () => {
-    try {
-      stream?.getTracks().forEach((track) => {
-        track.stop();
-      });
-      const res = await endStream();
-      console.log(res);
+  useEffect(() => {
+    const handleStopStream = async () => {
+      try {
+        if (stream) {
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => track.stop());
 
-      setStream(null);
-      setStreaming(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+          await endStream();
+
+          setStream(null);
+          setStreaming(false);
+          dispatch(showRoomProfile());
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    return () => {
+      handleStopStream();
+    };
+  }, [dispatch, endStream, isReadyToStream, stream]);
 
   const createConnectionStream = useCallback(
     async (username: string) => {
-      if (peerConnections[username] || !clientSocket) {
-        return;
-      }
-
       try {
         const peerConnection = new RTCPeerConnection();
 
@@ -81,7 +91,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
               data: event.candidate,
             };
 
-            clientSocket.send(
+            clientSocket?.send(
               `/chatrooms/${roomId}/viewer/${username}`,
               {},
               JSON.stringify(messageCandidate)
@@ -97,7 +107,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
             data: offer,
           };
 
-          clientSocket.send(
+          clientSocket?.send(
             `/chatrooms/${roomId}/viewer/${username}`,
             {},
             JSON.stringify(messageOffer)
@@ -106,22 +116,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
         peerConnection.onconnectionstatechange = () => {
           const connectionState = peerConnection.connectionState;
+          console.log(connectionState);
 
           if (connectionState === "disconnected") {
-            // setPeerConnections((prev) => {
-            //   const { [username]: deletedConnection, ...remainingConnections } = prev;
-            //   return { ...prev, peerConnections: remainingConnections };
-            // });
-
+            console.log(peerConnections);
             const { username, ...newState } = peerConnections;
             setPeerConnections(newState);
-
-            // setPeerConnections(prevState => {
-            //   const {[username]: peerConnection, ...rest} = prevState;
-            //   return rest;
-            // });
-
-            // setPeerConnections((prev) => delete prev[username]);
           }
         };
 
@@ -135,43 +135,46 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [clientSocket, peerConnections, roomId, stream]
   );
 
-  const handleSocketMessage = async (message: Stomp.Message) => {
-    try {
-      const data = JSON.parse(message.body);
+  const handleSocketMessage = useCallback(
+    async (message: Stomp.Message) => {
+      try {
+        const data = JSON.parse(message.body);
 
-      switch (data.event) {
-        case "connect": {
-          createConnectionStream(data.username);
-          break;
+        switch (data.event) {
+          case "connect": {
+            createConnectionStream(data.username);
+            break;
+          }
+          case "answer": {
+            const username = data.username;
+            const peerConnection = peerConnections?.[username];
+
+            if (peerConnection)
+              await peerConnection.setRemoteDescription(
+                new RTCSessionDescription(data.data)
+              );
+
+            break;
+          }
+
+          case "candidate": {
+            const username = data.username;
+            const peerConnection = peerConnections[username];
+
+            if (peerConnection)
+              await peerConnection.addIceCandidate(
+                new RTCIceCandidate(data.data)
+              );
+
+            break;
+          }
         }
-        case "answer": {
-          const username = data.username;
-          const peerConnection = peerConnections?.[username];
-
-          if (peerConnection)
-            await peerConnection.setRemoteDescription(
-              new RTCSessionDescription(data.data)
-            );
-
-          break;
-        }
-
-        case "candidate": {
-          const username = data.username;
-          const peerConnection = peerConnections && peerConnections[username];
-
-          if (peerConnection)
-            await peerConnection.addIceCandidate(
-              new RTCIceCandidate(data.data)
-            );
-
-          break;
-        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    },
+    [createConnectionStream, peerConnections]
+  );
 
   useStompSubscription({
     roomId,
@@ -192,10 +195,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
       <Button
         size="large"
         sx={{ mt: 5 }}
-        onClick={() => (stream ? handleStopStream() : handleStartStream())}
         variant="contained"
+        onClick={() =>
+          stream ? dispatch(unsetReadyStream()) : handleStartStream()
+        }
       >
-        {stream ? "Stop" : "Start"} stream
+        {stream ? "Close/Stop" : "Start"} stream
       </Button>
     </Grid>
   );

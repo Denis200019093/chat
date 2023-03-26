@@ -1,38 +1,38 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 interface IState {
-  streamStarted: boolean;
   creatingRoom: boolean;
+  showRoomProfile: boolean;
 }
 
 const initialState: IState = {
-  streamStarted: false,
   creatingRoom: false,
+  showRoomProfile: true,
 };
 
 const modesSlice = createSlice({
   name: "modes",
   initialState,
   reducers: {
-    onDefaultMode(state) {
-      state.streamStarted = true;
-    },
-    offDefaultMode(state) {
-      state.streamStarted = false;
-    },
     showCreateRoomModal(state) {
       state.creatingRoom = true;
     },
     hideCreateRoomModal(state) {
       state.creatingRoom = false;
     },
+    showRoomProfile(state) {
+      state.showRoomProfile = true;
+    },
+    hideRoomProfile(state) {
+      state.showRoomProfile = false;
+    },
   },
 });
 
 export const {
-  onDefaultMode,
-  offDefaultMode,
   showCreateRoomModal,
   hideCreateRoomModal,
+  showRoomProfile,
+  hideRoomProfile,
 } = modesSlice.actions;
 export const modesReducer = modesSlice.reducer;

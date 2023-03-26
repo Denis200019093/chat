@@ -21,26 +21,42 @@ const usersSlice = createSlice({
     getActiveUsers(state, action: PayloadAction<IUserRoom[]>) {
       state.activeUsers = action.payload;
     },
-    localSetActiveUser(state, action: PayloadAction<IUserRoom>) {
+    setActiveUser(state, action: PayloadAction<IUserRoom>) {
       const foundUser = state.activeUsers.find(
         (item) => item.username === action.payload.username
       );
-      if (foundUser && !state.activeUsers.includes(foundUser)) {
+
+      if (!foundUser)
         state.activeUsers = state.activeUsers.concat(action.payload);
-      }
     },
-    localDeleteActiveUser(state, action: PayloadAction<IUserRoom>) {
+    deleteActiveUser(state, action: PayloadAction<string>) {
       state.activeUsers = state.activeUsers.filter(
-        (user) => user.username !== action.payload.username
+        (user) => user.username !== action.payload
       );
+    },
+    setUserStreamingTrue(state, action: PayloadAction<string>) {
+      state.activeUsers.map((item) => {
+        if (item.username === action.payload) {
+          return (item.userStreaming = true);
+        }
+      });
+    },
+    setUserStreamingFalse(state, action: PayloadAction<string>) {
+      state.activeUsers.map((item) => {
+        if (item.username === action.payload) {
+          return (item.userStreaming = false);
+        }
+      });
     },
   },
 });
 
 export const {
   getActiveUsers,
-  localSetActiveUser,
-  localDeleteActiveUser,
+  setActiveUser,
+  deleteActiveUser,
   getMe,
+  setUserStreamingTrue,
+  setUserStreamingFalse,
 } = usersSlice.actions;
 export const usersReducer = usersSlice.reducer;

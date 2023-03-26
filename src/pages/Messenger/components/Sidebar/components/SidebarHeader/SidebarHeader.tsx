@@ -24,8 +24,8 @@ const SidebarHeader: React.FC = () => {
         sx={{
           color: "#fff",
           cursor: "pointer",
-          transition: "0.6s",
-          "&:hover": { transform: "rotate(180deg)" },
+          transition: "0.3s",
+          "&:hover": { color: "green" },
         }}
       />
     </Grid>

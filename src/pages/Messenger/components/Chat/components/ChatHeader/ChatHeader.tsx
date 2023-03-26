@@ -5,12 +5,9 @@ import Diversity1Icon from "@mui/icons-material/Diversity1";
 
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { setReadyStream } from "src/redux/slices/streamSlice";
+import { hideRoomProfile, showRoomProfile } from "src/redux/slices/modesSlice";
 
-interface IProps {
-  setShowRoomProfile: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const ChatHeader: React.FC<IProps> = ({ setShowRoomProfile }) => {
+const ChatHeader: React.FC = () => {
   const { isReadyToStream, isReadyToWatch } = useAppSelector(
     (state) => state.stream
   );
@@ -38,20 +35,23 @@ const ChatHeader: React.FC<IProps> = ({ setShowRoomProfile }) => {
         </Grid>
         <Grid item sx={{ mr: 1 }}>
           <Grid container alignItems="center">
-            <Button
-              onClick={() => dispatch(setReadyStream())}
-              variant="contained"
-              color="secondary"
-            >
-              Live
-            </Button>
-
             {isReadyToStream || isReadyToWatch ? (
               <Diversity1Icon
-                sx={{ ml: 2 }}
-                onClick={() => setShowRoomProfile(true)}
+                sx={{ ml: 2, color: "#fff", cursor: "pointer" }}
+                onClick={() => dispatch(showRoomProfile())}
               />
-            ) : null}
+            ) : (
+              <Button
+                onClick={() => {
+                  dispatch(hideRoomProfile());
+                  dispatch(setReadyStream());
+                }}
+                variant="contained"
+                color="secondary"
+              >
+                Live
+              </Button>
+            )}
           </Grid>
         </Grid>
       </Grid>

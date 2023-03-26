@@ -11,28 +11,26 @@ import {
 } from "src/redux/features/messages.api";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { ISendMessageData } from "src/types/root";
-import { endEdit } from "src/redux/slices/roomSlice";
+import { endEdit } from "src/redux/slices/messagesSlice";
+import CustomInput from "src/components/CustomInput";
 
 const SendMessageBar: React.FC = () => {
   const [sendMessage] = useSendMessageMutation();
   const [editMessage] = useEditMessageMutation();
 
-  const { roomId, editStatus } = useAppSelector((state) => state.messages);
+  const { editStatus } = useAppSelector((state) => state.messages);
+  const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
 
-  const {
-    handleSubmit,
-    register,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<ISendMessageData>({
-    mode: "onChange",
-    defaultValues: {
-      content: "",
-    },
-  });
+  const { handleSubmit, register, reset, setValue } = useForm<ISendMessageData>(
+    {
+      mode: "onChange",
+      defaultValues: {
+        content: "",
+      },
+    }
+  );
 
   useEffect(() => {
     if (editStatus.messageContent) {

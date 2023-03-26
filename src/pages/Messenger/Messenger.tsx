@@ -1,36 +1,25 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import Stomp from "stompjs";
 import { Grid } from "@mui/material";
 import { useCookies } from "react-cookie";
 
+import Sidebar from "./components/Sidebar";
+import Chat from "./components/Chat";
 import { createStompClient } from "src/configs/stomp";
 import { useAppSelector } from "src/hooks/useRedux";
 
-import Sidebar from "./components/Sidebar";
-import Chat from "./components/Chat";
-// import WatchStream from "./components/Video/components/WatchStream";
-
-import "./test.css";
-// import { Test } from "./components/Video/components/WatchStream/WatchStream";
-
-const Video = React.lazy(() => import("./components/Video"));
-const StartStream = React.lazy(
-  () => import("./components/Video/components/StartStream")
-);
-const WatchStream = React.lazy(
-  () => import("./components/Video/components/WatchStream")
-);
-const RoomProfile = React.lazy(() => import("./components/RoomProfile"));
-const CreateRoom = React.lazy(
+const StartStream = lazy(() => import("./components/StartStream"));
+const WatchStream = lazy(() => import("./components/WatchStream"));
+const RoomProfile = lazy(() => import("./components/RoomProfile"));
+const CreateRoom = lazy(
   () => import("./components/Chat/components/CreateRoom")
 );
 
 const Messenger: React.FC = () => {
-  const [showRoomProfile, setShowRoomProfile] = useState<boolean>(false);
   const [clientSocket, setClientSocket] = useState<Stomp.Client | null>(null);
 
   const [cookies] = useCookies(["token"]);
-  const { roomId } = useAppSelector((state) => state.messages);
+  const { roomId } = useAppSelector((state) => state.room);
   const { isReadyToWatch, isReadyToStream } = useAppSelector(
     (state) => state.stream
   );
@@ -51,7 +40,7 @@ const Messenger: React.FC = () => {
     setClientSocket(stompClient);
 
     const handleBeforeUnload = () =>
-      stompClient?.disconnect(() => {
+      stompClient.disconnect(() => {
         console.log("Disconnected from socket!");
       });
 
@@ -66,8 +55,8 @@ const Messenger: React.FC = () => {
   }, [cookies.token]);
 
   return (
-    <Grid container sx={{ overflow: "hidden", height: "100vh" }}>
-      <Grid container item xs={2}>
+    <Grid container sx={{ height: "100vh", position: "relative" }}>
+      <Grid item xs={2}>
         <Sidebar />
       </Grid>
       <Grid item xs={isReadyToStream || isReadyToWatch ? 7.25 : 0}>
@@ -92,23 +81,16 @@ const Messenger: React.FC = () => {
             sx={{ overflow: "hidden" }}
             xs={isReadyToStream || isReadyToWatch ? 2.75 : 7.5}
           >
-            <Chat
-              clientSocket={clientSocket}
-              setShowRoomProfile={setShowRoomProfile}
-            />
+            <Chat clientSocket={clientSocket} />
           </Grid>
           <Grid item xs={2.5}>
             <Suspense fallback={<div>Loading...</div>}>
-              <RoomProfile
-                clientSocket={clientSocket}
-                showRoomProfile={showRoomProfile}
-                setShowRoomProfile={setShowRoomProfile}
-              />
+              <RoomProfile />
             </Suspense>
           </Grid>
         </>
       ) : null}
-      {/* <Grid item xs={9.75}>
+      <Grid item xs={9.75}>
         <Grid
           container
           item
@@ -120,7 +102,7 @@ const Messenger: React.FC = () => {
             <CreateRoom />
           </Suspense>
         </Grid>
-      </Grid> */}
+      </Grid>
     </Grid>
   );
 };

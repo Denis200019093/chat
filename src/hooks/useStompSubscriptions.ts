@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
 
@@ -39,9 +39,20 @@ const useStompSubscription = ({
     default:
       break;
   }
+  console.log(
+    clientSocket,
+    clientSocket?.connected,
+    subscribeOn,
+    readyToSubscribe
+  );
 
   useEffect(() => {
-    if (clientSocket && subscribeOn && readyToSubscribe) {
+    if (
+      clientSocket &&
+      clientSocket.connected &&
+      subscribeOn &&
+      readyToSubscribe
+    ) {
       subscriptionRef.current = clientSocket.subscribe(
         urlSubscribe,
         handleSocketMessage
@@ -53,20 +64,17 @@ const useStompSubscription = ({
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-
       const subscription = subscriptionRef.current;
 
       if (subscription) {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
         subscription.unsubscribe();
-        console.log("Unsubscribed from subscription");
       }
     };
   }, [
     clientSocket,
     handleSocketMessage,
     readyToSubscribe,
-    roomId,
     subscribeOn,
     urlSubscribe,
   ]);

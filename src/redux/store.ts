@@ -1,10 +1,11 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { chatRoomsApi } from "./features/chatRooms.api";
 
-import { messagesReducer } from "./slices/roomSlice";
+import { messagesReducer } from "./slices/messagesSlice";
 import { modesReducer } from "./slices/modesSlice";
 import { usersReducer } from "./slices/usersSlice";
 import { streamReducer } from "./slices/streamSlice";
+import { roomReducer } from "./slices/roomSlice";
 
 const rootReducer = combineReducers({
   [chatRoomsApi.reducerPath]: chatRoomsApi.reducer,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   messages: messagesReducer,
   users: usersReducer,
   stream: streamReducer,
+  room: roomReducer,
 });
 
 export const setupStore = () => {

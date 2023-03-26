@@ -1,23 +1,23 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback } from "react";
 import Stomp from "stompjs";
-import { StompSubscription } from "@stomp/stompjs";
-import { Button, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 
 import ChatHeader from "./components/ChatHeader";
 import SendMessageBar from "./components/SendMessageBar";
 import Messages from "./components/Messages";
+import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import {
-  localAddMessage,
-  localDeleteMessage,
-  localEditMessage,
-} from "src/redux/slices/roomSlice";
+  addMessage,
+  deleteMessage,
+  editMessage,
+} from "src/redux/slices/messagesSlice";
 import {
-  localDeleteActiveUser,
-  localSetActiveUser,
+  deleteActiveUser,
+  setActiveUser,
+  setUserStreamingFalse,
+  setUserStreamingTrue,
 } from "src/redux/slices/usersSlice";
-import useStompSubscription from "src/hooks/useStompSubscriptions";
-import useScrollBottom from "src/hooks/useScrollBottom";
 
 interface MessageHeaders {
   "event-type": string;
@@ -25,11 +25,10 @@ interface MessageHeaders {
 
 interface IProps {
   clientSocket: Stomp.Client | null;
-  setShowRoomProfile: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Chat: React.FC<IProps> = ({ clientSocket, setShowRoomProfile }) => {
-  const { roomId } = useAppSelector((state) => state.messages);
+const Chat: React.FC<IProps> = ({ clientSocket }) => {
+  const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
 
@@ -39,16 +38,16 @@ const Chat: React.FC<IProps> = ({ clientSocket, setShowRoomProfile }) => {
 
       switch (headers["event-type"]) {
         case "chat-message": {
-          dispatch(localAddMessage(JSON.parse(message.body)));
+          dispatch(addMessage(JSON.parse(message.body)));
           break;
         }
         case "chat-message-delete": {
-          dispatch(localDeleteMessage(JSON.parse(message.body).id));
+          dispatch(deleteMessage(JSON.parse(message.body).id));
           break;
         }
         case "chat-message-edit": {
           dispatch(
-            localEditMessage({
+            editMessage({
               content: JSON.parse(message.body).content,
               messageId: JSON.parse(message.body).id,
             })
@@ -56,11 +55,21 @@ const Chat: React.FC<IProps> = ({ clientSocket, setShowRoomProfile }) => {
           break;
         }
         case "subscribe-event": {
-          dispatch(localSetActiveUser(message.body));
+          dispatch(
+            setActiveUser({ username: message.body, userStreaming: false })
+          );
           break;
         }
         case "unsubscribe-event": {
-          dispatch(localDeleteActiveUser(message.body));
+          dispatch(deleteActiveUser(message.body));
+          break;
+        }
+        case "stream-started-event": {
+          dispatch(setUserStreamingTrue(message.body));
+          break;
+        }
+        case "stream-ended-event": {
+          dispatch(setUserStreamingFalse(message.body));
           break;
         }
       }
@@ -87,7 +96,7 @@ const Chat: React.FC<IProps> = ({ clientSocket, setShowRoomProfile }) => {
       }}
     >
       <Grid container item sx={{ flexShrink: 0, height: "65px" }}>
-        <ChatHeader setShowRoomProfile={setShowRoomProfile} />
+        <ChatHeader />
       </Grid>
       <Grid item xs>
         <Messages />

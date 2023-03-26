@@ -28,7 +28,8 @@ export default Sidebar;
 
 const RoomsContainer = styled(Grid)({
   overflowY: "auto",
-  height: "calc(100vh - 145px)",
+  marginTop: "10px",
+  height: "calc(100vh - 140px)",
   "&::-webkit-scrollbar": {
     width: "8px",
   },
