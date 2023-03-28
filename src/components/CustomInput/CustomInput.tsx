@@ -1,22 +1,19 @@
 import React, { forwardRef } from "react";
 import { RefCallBack } from "react-hook-form";
 import TextField, { BaseTextFieldProps } from "@mui/material/TextField";
-import { InputProps, styled } from "@mui/material";
+import { styled } from "@mui/material";
 
 interface IProps extends BaseTextFieldProps {
   suggestions?: boolean; // Default browser autocomplete
-  // InputProps?: InputProps;
 }
 
 const CustomInput = forwardRef<RefCallBack, IProps>(
   ({ suggestions = false, ...props }, ref) => {
     return (
       <Input
+        inputRef={ref}
+        sx={{}}
         inputProps={{
-          // startAdornment: <SearchIcon sx={{ color: "lightgray", mr: 0.5 }} />,
-          // style: {
-          //   paddingRight: "4px",
-          // },
           autoComplete: suggestions ? "" : "new-password",
           form: {
             autoComplete: suggestions ? "on" : "off",

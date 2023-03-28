@@ -19,6 +19,8 @@ const useStompSubscription = ({
   handleSocketMessage,
   username,
 }: UseStompSubscriptionParams) => {
+  const [subscriptionActive, setSubscriptionActive] = useState(false);
+
   const subscriptionRef = useRef<StompSubscription | null>(null);
 
   let destination = "";
@@ -39,13 +41,7 @@ const useStompSubscription = ({
     default:
       break;
   }
-  console.log(
-    clientSocket,
-    clientSocket?.connected,
-    subscribeOn,
-    readyToSubscribe
-  );
-
+  
   useEffect(() => {
     if (
       clientSocket &&
@@ -55,8 +51,11 @@ const useStompSubscription = ({
     ) {
       subscriptionRef.current = clientSocket.subscribe(
         destination,
-        handleSocketMessage,
-        {'id' : destination}
+        (message) => {
+          setSubscriptionActive(true)
+          handleSocketMessage(message);
+        },
+        { id: destination }
       );
     }
 
@@ -79,6 +78,11 @@ const useStompSubscription = ({
     subscribeOn,
     destination,
   ]);
+
+  return {
+    subscriptionActive,
+    subscriptionRef
+  };
 };
 
 export default useStompSubscription;

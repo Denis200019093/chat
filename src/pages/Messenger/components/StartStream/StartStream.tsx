@@ -116,12 +116,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
         peerConnection.onconnectionstatechange = () => {
           const connectionState = peerConnection.connectionState;
-          console.log(connectionState);
 
           if (connectionState === "disconnected") {
-            console.log(peerConnections);
-            const { username, ...newState } = peerConnections;
-            setPeerConnections(newState);
+            setPeerConnections((prevPeerConnections) => {
+              const { [username]: _, ...newState } = prevPeerConnections;
+              return Object.fromEntries(Object.entries(newState));
+            });
           }
         };
 
@@ -176,7 +176,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [createConnectionStream, peerConnections]
   );
 
-  useStompSubscription({
+  const { subscriptionActive } = useStompSubscription({
     roomId,
     clientSocket,
     readyToSubscribe: isStreaming,

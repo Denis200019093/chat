@@ -17,12 +17,10 @@ const ActiveUser: React.FC<IProps> = ({ user }) => {
   const youStream = me?.username === user.username;
 
   const startWatchStream = () => {
-    if (youStream) {
-      return;
+    if (!youStream) {
+      dispatch(unsetReadyWatch());
+      dispatch(setReadyWatch());
     }
-
-    dispatch(unsetReadyWatch());
-    dispatch(setReadyWatch());
   };
 
   return (

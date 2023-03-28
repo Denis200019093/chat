@@ -10,10 +10,10 @@ const Sidebar: React.FC = () => {
     <Grid
       container
       item
-      sx={{ bgcolor: "rgb(35,35,35)" }}
+      sx={{ bgcolor: "rgb(35,35,35)", height: "100%" }}
       justifyContent="center"
     >
-      <Grid container item xs={11}>
+      <Grid item xs={11}>
         <SidebarHeader />
         <CustomInput placeholder="Search" fullWidth />
       </Grid>

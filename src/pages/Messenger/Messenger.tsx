@@ -23,7 +23,7 @@ const Messenger: React.FC = () => {
   const { isReadyToWatch, isReadyToStream } = useAppSelector(
     (state) => state.stream
   );
-
+    
   useEffect(() => {
     const stompClient = createStompClient();
 

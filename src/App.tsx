@@ -2,8 +2,8 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import Register from "./pages/Register";
-import Login from "./pages/Login";
+import Test from "./pages/Test";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound/NotFound";
 import Messenger from "./pages/Messenger";
 import Profile from "./pages/Profile";
@@ -28,15 +28,15 @@ const App: React.FC = () => {
       <Grid
         container
         item
-        sx={{ height: "100vh", bgcolor: 'rgba(35,35,35,1)' }}
+        sx={{ height: "100vh", bgcolor: "rgba(35,35,35,1)" }}
         justifyContent="center"
         alignItems="center"
       >
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/auth" />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Navigate to="/auth" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Grid>
@@ -53,8 +53,7 @@ const App: React.FC = () => {
     >
       <Routes>
         <Route path="/" element={<Messenger />} />
-        <Route path="/register" element={<Navigate to="/" />} />
-        <Route path="/login" element={<Navigate to="/" />} />
+        <Route path="/auth" element={<Navigate to="/" />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
