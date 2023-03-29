@@ -69,9 +69,9 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
     roomId,
     clientSocket,
     handleSocketMessage,
-    readyToSubscribe: isWatching,
     username: me?.username,
     subscribeOn: "live-stream",
+    readyToSubscribe: true,
   });
 
   useEffect(() => {
@@ -110,7 +110,6 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
             }
           };
 
-          setWatching(true);
           setPeerConnection(pc);
         }
       } catch (error) {
@@ -118,7 +117,7 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
       }
     };
 
-    if (isReadyToWatch) connectToStream();
+    if (subscriptionActive && isReadyToWatch) connectToStream();
   }, [
     clientSocket,
     isReadyToWatch,

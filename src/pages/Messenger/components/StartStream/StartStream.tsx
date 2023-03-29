@@ -132,7 +132,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
         console.log(error);
       }
     },
-    [clientSocket, peerConnections, roomId, stream]
+    [clientSocket, roomId, stream]
   );
 
   const handleSocketMessage = useCallback(

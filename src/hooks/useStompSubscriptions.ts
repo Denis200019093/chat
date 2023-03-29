@@ -41,7 +41,7 @@ const useStompSubscription = ({
     default:
       break;
   }
-  
+
   useEffect(() => {
     if (
       clientSocket &&
@@ -51,12 +51,10 @@ const useStompSubscription = ({
     ) {
       subscriptionRef.current = clientSocket.subscribe(
         destination,
-        (message) => {
-          setSubscriptionActive(true)
-          handleSocketMessage(message);
-        },
+        handleSocketMessage,
         { id: destination }
       );
+      setSubscriptionActive(true);
     }
 
     const handleBeforeUnload = () => subscriptionRef.current?.unsubscribe();
@@ -81,7 +79,7 @@ const useStompSubscription = ({
 
   return {
     subscriptionActive,
-    subscriptionRef
+    subscriptionRef,
   };
 };
 
