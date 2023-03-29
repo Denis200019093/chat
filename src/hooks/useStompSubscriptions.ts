@@ -5,16 +5,16 @@ import Stomp from "stompjs";
 type UseStompSubscriptionParams = {
   roomId: number;
   clientSocket: Stomp.Client | null;
-  readyToSubscribe: boolean;
   subscribeOn: "chat" | "my-stream" | "live-stream";
   handleSocketMessage: (message: Stomp.Message) => Promise<void> | void;
+  readyToSubscribe?: boolean;
   username?: string;
 };
 
 const useStompSubscription = ({
   roomId,
   clientSocket,
-  readyToSubscribe,
+  readyToSubscribe = true,
   subscribeOn,
   handleSocketMessage,
   username,

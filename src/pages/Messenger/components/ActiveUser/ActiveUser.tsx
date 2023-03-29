@@ -18,7 +18,6 @@ const ActiveUser: React.FC<IProps> = ({ user }) => {
 
   const startWatchStream = () => {
     if (!youStream) {
-      dispatch(unsetReadyWatch());
       dispatch(setReadyWatch());
     }
   };
