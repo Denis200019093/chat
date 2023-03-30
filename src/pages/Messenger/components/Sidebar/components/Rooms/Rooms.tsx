@@ -1,67 +1,53 @@
-import React from "react";
-import { Avatar, Grid } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Grid, CircularProgress } from "@mui/material";
+import { useInView } from "react-intersection-observer";
 
-import MultiLineText from "src/components/MultiLineText";
+import Room from "../Room";
+import { IRoom } from "src/types/root";
 import { useGetRoomsQuery } from "src/redux/features/chatRooms.api";
-import { getRoomId } from "src/redux/slices/roomSlice";
-import { useAppDispatch } from "src/hooks/useRedux";
-import { showRoomProfile } from "src/redux/slices/modesSlice";
-import {
-  unsetReadyStream,
-  unsetReadyWatch,
-} from "src/redux/slices/streamSlice";
 
 const Rooms: React.FC = () => {
-  const { data: rooms } = useGetRoomsQuery();
+  const [allRooms, setAllRooms] = useState<IRoom[]>([]);
+  const [totalRooms, setTotalRooms] = useState<number | null>(null);
+  const [pageCount, setPageCount] = useState<number>(0);
+  console.log("Ky");
+  
+  const { data: rooms, isFetching } = useGetRoomsQuery(pageCount, {
+    refetchOnMountOrArgChange: true,
+    // skip: allRooms.length === totalRooms,
+  });
 
-  const dispatch = useAppDispatch();
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    skip: allRooms.length === totalRooms,
+  });
 
-  const joinRoom = (roomId: number) => {
-    dispatch(getRoomId(roomId));
-    dispatch(unsetReadyStream());
-    dispatch(unsetReadyWatch());
-    dispatch(showRoomProfile());
-  };
+  useEffect(() => {
+    if (rooms) {
+      setAllRooms((prevRooms) => [...prevRooms, ...rooms.content]);
+      setTotalRooms(rooms.totalElements);
+    }
+  }, [rooms]);
+
+  useEffect(() => {
+    if (inView) {
+      setPageCount((prevCount) => prevCount + 1);
+    }
+  }, [inView]);
 
   return (
-    <>
-      {rooms?.map((room) => (
-        <Grid
-          key={room.id}
-          container
-          item
-          sx={{
-            p: "16px 8px",
-            transition: "0.3s",
-            cursor: "pointer",
-            "&:hover": {
-              bgcolor: "rgba(255,255,255,0.15)",
-            },
-          }}
-          onClick={() => joinRoom(room.id)}
-          flexWrap="nowrap"
-        >
-          <Grid item>
-            <Avatar
-              src="https://cdn.forbes.ru/forbes-static/new/2022/12/avatar-o-639c1ab0b942e.jpg"
-              sx={{ mr: 1 }}
-            />
-          </Grid>
-          <Grid item>
-            <Grid container item>
-              <MultiLineText text={room.name} variant="h6" />
-            </Grid>
-            <Grid container item>
-              <MultiLineText
-                text={room.description}
-                quantityLines={2}
-                variant="body2"
-              />
-            </Grid>
-          </Grid>
+    <Grid container>
+      {allRooms.map((room, index) => (
+        <Grid key={room.id} container ref={index === 0 ? ref : null}>
+          <Room room={room} />
         </Grid>
       ))}
-    </>
+      {isFetching && (
+        <Grid container>
+          <CircularProgress />
+        </Grid>
+      )}
+    </Grid>
   );
 };
 

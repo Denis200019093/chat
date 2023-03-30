@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { IRoom } from "../../types/root";
+import { IRoom, RoomsData } from "../../types/root";
 
 export const chatRoomsApi = createApi({
   reducerPath: "chatRooms",
@@ -17,9 +17,9 @@ export const chatRoomsApi = createApi({
     },
   }),
   endpoints: (build) => ({
-    getRooms: build.query<IRoom[], void>({
-      query: () => ({
-        url: `/chatrooms`,
+    getRooms: build.query<RoomsData, number>({
+      query: (pageCount) => ({
+        url: `/chatrooms?page=${pageCount}`,
       }),
       providesTags: [{ type: "Room", id: "Check" }],
     }),

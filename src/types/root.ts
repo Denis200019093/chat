@@ -2,7 +2,13 @@
 export interface IUser {
   id: number;
   username: string;
-  avatarUrl: string;
+  userStreaming: boolean;
+  avatarUrl?: string;
+}
+
+export interface IUserBasicData extends IUser {
+  username: string;
+  userStreaming: boolean;
 }
 
 // Room fields
@@ -13,10 +19,20 @@ export interface IUserRoom {
 
 export interface IRoom {
   id: number;
+  streamOn: boolean;
   name: string;
   description: string;
-  streamOn: boolean;
   users: IUserRoom[];
+}
+
+export interface PaginationValues {
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface RoomsData extends PaginationValues {
+  content: IRoom[];
 }
 
 // Message fields
@@ -27,9 +43,15 @@ export interface IMessage {
   user: IUser;
 }
 
+export interface MessagesData extends PaginationValues {
+  content: IMessage[];
+}
+
 // Data for sending a message
 export interface ISendMessageData {
   content: string;
+  totalElements: number;
+  totalPages: number;
 }
 
 // Data for login/register

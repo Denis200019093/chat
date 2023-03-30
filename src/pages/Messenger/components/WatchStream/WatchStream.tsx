@@ -13,7 +13,7 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
   const { me } = useAppSelector((state) => state.users);
   const { roomId } = useAppSelector((state) => state.room);
   const { isReadyToWatch } = useAppSelector((state) => state.stream);
-
+  
   const peerConnection = React.useRef<RTCPeerConnection | null>(null);
   const liveStream = React.useRef<HTMLVideoElement | null>(null);
 
@@ -113,8 +113,6 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
           };
 
           peerConnection.current = pc;
-
-          // setPeerConnection(pc);
         }
       } catch (error) {
         console.log(error);

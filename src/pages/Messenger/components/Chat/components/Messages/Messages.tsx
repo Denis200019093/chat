@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
+import { TransitionGroup } from "react-transition-group";
 import {
   Button,
   Collapse,
@@ -10,48 +12,65 @@ import {
 
 import SouthIcon from "@mui/icons-material/South";
 
-import useScrollBottom from "src/hooks/useScrollBottom";
 import Message from "./components/Message";
+import useScrollBottom from "src/hooks/useScrollBottom";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import { clear, getMessages } from "src/redux/slices/messagesSlice";
-import { TransitionGroup } from "react-transition-group";
+import { getMessages } from "src/redux/slices/messagesSlice";
+
+interface IProps {
+  blockRef: React.MutableRefObject<HTMLDivElement>;
+  scrollToBottom: () => void;
+}
 
 const Messages: React.FC = () => {
+  const [totalPages, setTotalPages] = useState<number | null>(null);
+  const [pageCount, setPageCount] = useState<number>(0);
+
   const { messages } = useAppSelector((state) => state.messages);
   const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
 
-  const { ref, scrollToBottom } = useScrollBottom();
+  // const blockRef = useScrollBottom([messages]);
+  const refToScroll = React.useRef<HTMLDivElement | null>(null);
+
   const {
-    data: receivedMessages = { content: [] },
+    data: receivedMessages,
     isFetching,
     isLoading,
-  } = useGetMessagesQuery(roomId, {
-    refetchOnMountOrArgChange: true,
-    skip: !roomId,
+  } = useGetMessagesQuery(
+    { roomId, pageCount },
+    {
+      refetchOnMountOrArgChange: true,
+      skip: !roomId,
+    }
+  );
+
+  const { ref, inView } = useInView({
+    threshold: 1,
+    skip: totalPages === pageCount,
   });
-  console.log(isFetching);
 
   useEffect(() => {
-    if (receivedMessages.content && !isFetching) {
+    if (receivedMessages) {
       dispatch(getMessages(receivedMessages.content));
+      setTotalPages(receivedMessages.totalPages);
     }
-  }, [dispatch, isFetching, receivedMessages.content]);
+  }, [dispatch, receivedMessages]);
 
-  // useEffect(() => {
-  //   if (
-  //     receivedMessages.content &&
-  //     JSON.stringify(receivedMessages.content) !== JSON.stringify(messages)
-  //   ) {
-  //     dispatch(getMessages(receivedMessages.content));
-  //   }
-  // }, [dispatch, messages, receivedMessages.content]);
+  useEffect(() => {
+    if (inView) {
+      setPageCount((prevCount) => prevCount + 1);
+    }
+  }, [inView]);
+
+  useEffect(() => {
+    refToScroll.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
 
   return (
     <ChatContainer
-      ref={ref}
       container
       item
       sx={{
@@ -67,14 +86,12 @@ const Messages: React.FC = () => {
       justifyContent="center"
       alignItems="flex-end"
     >
-      <Grid container item xs={11}>
-        {/* <TransitionGroup> */}
-        {messages.map((message) => (
-          // <Collapse key={message.id}>
-          <Message message={message} />
-          // </Collapse>
+      <Grid ref={refToScroll} container item xs={11}>
+        {messages.map((message, index) => (
+          <Grid container ref={index === 4 ? ref : null}>
+            <Message key={message.id} message={message} />
+          </Grid>
         ))}
-        {/* </TransitionGroup> */}
       </Grid>
       {!messages.length && !isLoading ? (
         <Grid container justifyContent="center">
@@ -132,12 +149,3 @@ const bounceAnimation = keyframes({
     transform: "translateY(0)",
   },
 });
-
-// const bounceAnimation = keyframes({
-//   "0%, 100%": {
-//     transform: "translateY(0)",
-//   },
-//   "50%": {
-//     transform: "translateY(-10px)",
-//   },
-// });

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import {
   Grid,
   Tooltip,
@@ -26,21 +26,20 @@ interface IProps {
 const Message: React.FC<IProps> = ({ message }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const open = Boolean(anchorEl);
-
   const { me } = useAppSelector((state) => state.users);
+  const [hoverRef, isHovered] = useHover<HTMLDivElement>();
+  const [deleteMessage] = useDeleteMessageMutation();
+  const dispatch = useAppDispatch();
+
+  const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const [hoverRef, isHovered] = useHover<HTMLDivElement>();
-  const dispatch = useAppDispatch();
-
-  const [deleteMessage] = useDeleteMessageMutation();
 
   const options = useMemo(() => {
     return [

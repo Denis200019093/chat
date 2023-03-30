@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUser, IUserRoom } from "src/types/root";
+import { IUser, IUserRoom, IUserBasicData } from "src/types/root";
 
 interface IState {
   activeUsers: IUserRoom[];
-  me: IUser | null;
+  me: IUser | IUserBasicData | null;
 }
 
 const initialState: IState = {
@@ -15,7 +15,7 @@ const usersSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    getMe(state, action: PayloadAction<IUser>) {
+    getMe(state, action: PayloadAction<IUser | IUserBasicData>) {
       state.me = action.payload;
     },
     getActiveUsers(state, action: PayloadAction<IUserRoom[]>) {

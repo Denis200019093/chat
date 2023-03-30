@@ -1,11 +1,14 @@
 import { chatRoomsApi } from "./chatRooms.api";
-import { IMessage } from "../../types/root";
+import { IMessage, MessagesData } from "../../types/root";
 
 export const messagesApi = chatRoomsApi.injectEndpoints({
   endpoints: (build) => ({
-    getMessages: build.query<{ content: IMessage[] }, number>({
-      query: (roomId) => ({
-        url: `/chatrooms/${roomId}/messages`,
+    getMessages: build.query<
+      MessagesData,
+      { roomId: number; pageCount: number }
+    >({
+      query: ({ roomId, pageCount }) => ({
+        url: `/chatrooms/${roomId}/messages?page=${pageCount}`,
       }),
     }),
     sendMessage: build.mutation<

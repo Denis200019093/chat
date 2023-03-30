@@ -2,9 +2,10 @@ import React, { useCallback } from "react";
 import Stomp from "stompjs";
 import { Grid } from "@mui/material";
 
-import ChatHeader from "./components/ChatHeader";
-import SendMessageBar from "./components/SendMessageBar";
 import Messages from "./components/Messages";
+import ChatHeader from "./components/ChatHeader";
+import useScrollBottom from "src/hooks/useScrollBottom";
+import SendMessageBar from "./components/SendMessageBar";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import {
@@ -31,6 +32,8 @@ const Chat: React.FC<IProps> = ({ clientSocket }) => {
   const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
+
+  // const { blockRef, scrollToBottom } = useScrollBottom();
 
   const handleSocketMessage = useCallback(
     (message: Stomp.Message) => {

@@ -1,42 +1,41 @@
 import { useState, useRef, useEffect } from "react";
 
-// const useScrollBottom = () => {
-//   const [isAtBottom, setIsAtBottom] = useState(false);
+const useScrollBottom = (deps: React.DependencyList, smooth?: boolean) => {
+  const blockRef = useRef<HTMLDivElement | null>(null);
 
-//   const ref =
-//     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
-//   console.log(isAtBottom);
+  // useEffect(() => {
+  //   const elem = blockRef.current;
 
-//   useEffect(() => {
-//     if (isAtBottom && ref.current) {
-//       ref.current.scrollIntoView({
-//         behavior: "smooth",
-//         block: "end",
-//       });
-//       setIsAtBottom(false);
-//     }
-//   }, [isAtBottom]);
+  //   const isScrolledToBottom =
+  //     elem && elem.scrollHeight - elem.scrollTop === elem.clientHeight;
 
-//   return {
-//     ref,
-//     setIsAtBottom,
-//   };
-// };
+  //   if (elem && (isScrolledToBottom || elem.scrollTop === 0)) {
+  //     elem.scrollTop = elem.scrollHeight;
+  //   }
+  // }, [deps]);
 
-const useScrollBottom = () => {
-  const ref =
-    useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
+  // useEffect(() => {
+  //   if (blockRef.current) {
+  //     blockRef.current.scrollTop = blockRef.current.scrollHeight;
+  //   }
+  // }, [deps]);
+  useEffect(() => {
+    const scrollToBottom = () => {
+      if (blockRef.current) {
+        if (smooth) {
+          blockRef.current.scrollTo({
+            top: blockRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        } else {
+          blockRef.current.scrollTop = blockRef.current.scrollHeight;
+        }
+      }
+    };
 
-  const scrollToBottom = () => {
-    if (ref.current) {
-      ref.current.scrollTop = ref.current.scrollHeight;
-    }
-  };
-
-  return {
-    ref,
-    scrollToBottom,
-  };
+    scrollToBottom();
+  }, [deps, smooth]);
+  return blockRef;
 };
 
 export default useScrollBottom;

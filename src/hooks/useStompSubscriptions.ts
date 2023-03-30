@@ -35,7 +35,7 @@ const useStompSubscription = ({
       break;
     }
     case "live-stream": {
-      destination = `/chatrooms/${roomId}/viewer/${username}`;
+      if (username) destination = `/chatrooms/${roomId}/viewer/${username}`;
       break;
     }
     default:

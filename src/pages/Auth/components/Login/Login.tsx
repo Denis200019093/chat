@@ -12,6 +12,8 @@ import {
   isErrorWithMessage,
   isFetchBaseQueryError,
 } from "src/helpers/handleError";
+import { getMe } from "src/redux/slices/usersSlice";
+import { useAppDispatch } from "src/hooks/useRedux";
 
 interface IProps {
   signingIn: boolean;
@@ -26,6 +28,7 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
   const [cookies, setCookie] = useCookies(["token"]);
 
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const {
     handleSubmit,
@@ -50,6 +53,7 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
 
         if (token) {
           navigate("/");
+          dispatch(getMe({ username: values.username, userStreaming: false }));
           setCookie("token", token, {
             path: "/",
             expires: new Date(Date.now() + 10000000),
@@ -67,7 +71,7 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
         // }
       }
     },
-    [navigate, setCookie, signIn]
+    [dispatch, navigate, setCookie, signIn]
   );
 
   return (
