@@ -3,13 +3,14 @@ import { Avatar, Skeleton, Grid } from "@mui/material";
 
 import MultiLineText from "src/components/MultiLineText";
 import { IRoom } from "src/types/root";
-import { getRoomId } from "src/redux/slices/roomSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
 import { showRoomProfile } from "src/redux/slices/modesSlice";
 import {
   unsetReadyStream,
   unsetReadyWatch,
 } from "src/redux/slices/streamSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { clear } from "src/redux/slices/messagesSlice";
 
 interface IProps {
   room: IRoom;
@@ -18,11 +19,15 @@ interface IProps {
 const Room: React.FC<IProps> = ({ room }) => {
   const dispatch = useAppDispatch();
 
-  const joinRoom = (roomId: number) => {
-    dispatch(getRoomId(roomId));
+  const navigate = useNavigate();
+  const { id: roomId } = useParams();
+
+  const joinRoom = (roomId: string) => {
+    navigate(`/chatroom/${roomId}`);
     dispatch(unsetReadyStream());
     dispatch(unsetReadyWatch());
     dispatch(showRoomProfile());
+    // dispatch(clear());
   };
 
   return (
@@ -31,10 +36,12 @@ const Room: React.FC<IProps> = ({ room }) => {
       item
       flexWrap="nowrap"
       onClick={() => joinRoom(room.id)}
+      // onClick={() => joinRoom(room.id)}
       sx={{
         p: "16px 8px",
         transition: "0.3s",
         cursor: "pointer",
+        bgcolor: roomId && +roomId === +room.id ? "rgba(255,255,255,0.15)" : "",
         "&:hover": {
           bgcolor: "rgba(255,255,255,0.15)",
         },

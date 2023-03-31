@@ -14,12 +14,13 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 
+import CustomInput from "src/components/CustomInput";
 import { useCreateRoomMutation } from "src/redux/features/chatRooms.api";
 import { CreateRoomData } from "src/types/root";
 import { TransitionProps } from "@mui/material/transitions";
 import { hideCreateRoomModal } from "src/redux/slices/modesSlice";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import CustomInput from "src/components/CustomInput";
+import { useParams } from "react-router-dom";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -85,8 +86,8 @@ const CreateRoom: React.FC = () => {
   const [createRoom, { isLoading }] = useCreateRoomMutation();
 
   const { creatingRoom } = useAppSelector((state) => state.modes);
-  const { roomId } = useAppSelector((state) => state.room);
 
+  const { id: roomId } = useParams();
   const dispatch = useAppDispatch();
 
   const hideDialog = () => dispatch(hideCreateRoomModal());
@@ -111,7 +112,7 @@ const CreateRoom: React.FC = () => {
   }
 
   return (
-    <CreateRoomContainer item xs={8} md={4}>
+    <CreateRoomContainer item>
       <CreateRoomForm onSubmit={createRoom} isLoading={isLoading} />
     </CreateRoomContainer>
   );

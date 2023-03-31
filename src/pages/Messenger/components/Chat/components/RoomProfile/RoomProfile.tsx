@@ -1,30 +1,39 @@
 import React, { useEffect, useState } from "react";
 import Stomp from "stompjs";
-import { Grid, Typography, Button, Drawer } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Button,
+  Drawer,
+  CircularProgress,
+} from "@mui/material";
 
 import DescriptionIcon from "@mui/icons-material/Description";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
-import ActiveUser from "../ActiveUser";
+import ActiveUser from "../../../ActiveUser";
 import MultiLineText from "src/components/MultiLineText";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetRoomInfoQuery } from "src/redux/features/chatRooms.api";
 import { getActiveUsers } from "src/redux/slices/usersSlice";
 import { hideRoomProfile } from "src/redux/slices/modesSlice";
+import { useParams } from "react-router-dom";
 
 const RoomProfile: React.FC = () => {
   const { activeUsers } = useAppSelector((state) => state.users);
   const { showRoomProfile } = useAppSelector((state) => state.modes);
-  const { roomId } = useAppSelector((state) => state.room);
+
+  const dispatch = useAppDispatch();
+  const { id: roomId } = useParams();
+
   const { isReadyToStream, isReadyToWatch } = useAppSelector(
     (state) => state.stream
   );
 
-  const { data: roomInfo } = useGetRoomInfoQuery(roomId, {
+  const { data: roomInfo, isLoading } = useGetRoomInfoQuery(roomId, {
     refetchOnMountOrArgChange: true,
+    skip: !roomId,
   });
-
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (roomInfo && roomInfo.users.length && roomId)

@@ -23,7 +23,7 @@ export const chatRoomsApi = createApi({
       }),
       providesTags: [{ type: "Room", id: "Check" }],
     }),
-    getRoomInfo: build.query<IRoom, number>({
+    getRoomInfo: build.query<IRoom, string | undefined>({
       query: (roomId) => ({
         url: `/chatrooms/${roomId}`,
       }),

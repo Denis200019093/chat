@@ -18,7 +18,7 @@ export interface IUserRoom {
 }
 
 export interface IRoom {
-  id: number;
+  id: string;
   streamOn: boolean;
   name: string;
   description: string;

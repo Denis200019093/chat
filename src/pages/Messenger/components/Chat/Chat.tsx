@@ -1,13 +1,14 @@
 import React, { useCallback } from "react";
 import Stomp from "stompjs";
 import { Grid } from "@mui/material";
+import { useOutletContext, useParams } from "react-router-dom";
 
 import Messages from "./components/Messages";
 import ChatHeader from "./components/ChatHeader";
-import useScrollBottom from "src/hooks/useScrollBottom";
+import RoomProfile from "./components/RoomProfile";
 import SendMessageBar from "./components/SendMessageBar";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { useAppDispatch } from "src/hooks/useRedux";
 import {
   addMessage,
   deleteMessage,
@@ -24,16 +25,12 @@ interface MessageHeaders {
   "event-type": string;
 }
 
-interface IProps {
-  clientSocket: Stomp.Client | null;
-}
-
-const Chat: React.FC<IProps> = ({ clientSocket }) => {
-  const { roomId } = useAppSelector((state) => state.room);
+const Chat: React.FC = () => {
+  const [clientSocket] = useOutletContext<any>();
 
   const dispatch = useAppDispatch();
 
-  // const { blockRef, scrollToBottom } = useScrollBottom();
+  const { id: roomId } = useParams();
 
   const handleSocketMessage = useCallback(
     (message: Stomp.Message) => {
@@ -83,8 +80,8 @@ const Chat: React.FC<IProps> = ({ clientSocket }) => {
   useStompSubscription({
     roomId,
     clientSocket,
-    readyToSubscribe: true,
     handleSocketMessage,
+    readyToSubscribe: clientSocket?.connected,
     subscribeOn: "chat",
   });
 
@@ -107,6 +104,7 @@ const Chat: React.FC<IProps> = ({ clientSocket }) => {
       <Grid item sx={{ flexShrink: 0 }}>
         <SendMessageBar />
       </Grid>
+      <RoomProfile />
     </Grid>
   );
 };

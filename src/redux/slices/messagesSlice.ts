@@ -4,6 +4,11 @@ import { IMessage } from "../../types/root";
 
 interface IState {
   messages: IMessage[];
+  // messages: {
+  //   content: IMessage[];
+  //   totalPages: number;
+  //   pageCount: number;
+  // };
   editStatus: {
     isEditing: boolean;
     messageId: number | null;
@@ -25,7 +30,6 @@ const messagesSlice = createSlice({
   initialState,
   reducers: {
     getMessages(state, action: PayloadAction<IMessage[]>) {
-      // state.messages = action.payload;
       state.messages = [...action.payload, ...state.messages];
     },
     addMessage(state, action: PayloadAction<IMessage>) {

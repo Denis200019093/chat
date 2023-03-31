@@ -13,14 +13,15 @@ import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { ISendMessageData } from "src/types/root";
 import { endEdit } from "src/redux/slices/messagesSlice";
 import CustomInput from "src/components/CustomInput";
+import { useParams } from "react-router-dom";
 
 const SendMessageBar: React.FC = () => {
   const [sendMessage] = useSendMessageMutation();
   const [editMessage] = useEditMessageMutation();
 
   const { editStatus } = useAppSelector((state) => state.messages);
-  const { roomId } = useAppSelector((state) => state.room);
 
+  const { id: roomId } = useParams();
   const dispatch = useAppDispatch();
 
   const { handleSubmit, register, reset, setValue } = useForm<ISendMessageData>(

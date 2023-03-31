@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
 
 type UseStompSubscriptionParams = {
-  roomId: number;
+  roomId: string | undefined;
   clientSocket: Stomp.Client | null;
   subscribeOn: "chat" | "my-stream" | "live-stream";
   handleSocketMessage: (message: Stomp.Message) => Promise<void> | void;
@@ -19,42 +19,34 @@ const useStompSubscription = ({
   handleSocketMessage,
   username,
 }: UseStompSubscriptionParams) => {
-  const [subscriptionActive, setSubscriptionActive] = useState(false);
-
   const subscriptionRef = useRef<StompSubscription | null>(null);
 
-  let destination = "";
+  const myRoomId = Number(roomId);
 
-  switch (subscribeOn) {
-    case "chat": {
-      destination = `/chatrooms/${roomId}`;
-      break;
+  const destination = useMemo(() => {
+    switch (subscribeOn) {
+      case "chat": {
+        return `/chatrooms/${myRoomId}`;
+        break;
+      }
+      case "my-stream": {
+        return `/chatrooms/${myRoomId}/streamer`;
+        break;
+      }
+      case "live-stream": {
+        return `/chatrooms/${myRoomId}/viewer/${username}`;
+        break;
+      }
     }
-    case "my-stream": {
-      destination = `/chatrooms/${roomId}/streamer`;
-      break;
-    }
-    case "live-stream": {
-      if (username) destination = `/chatrooms/${roomId}/viewer/${username}`;
-      break;
-    }
-    default:
-      break;
-  }
+  }, [myRoomId, subscribeOn, username]);
 
   useEffect(() => {
-    if (
-      clientSocket &&
-      clientSocket.connected &&
-      subscribeOn &&
-      readyToSubscribe
-    ) {
+    if (clientSocket?.connected && subscribeOn && readyToSubscribe) {
       subscriptionRef.current = clientSocket.subscribe(
         destination,
         handleSocketMessage,
         { id: destination }
       );
-      setSubscriptionActive(true);
     }
 
     const handleBeforeUnload = () => subscriptionRef.current?.unsubscribe();
@@ -71,16 +63,11 @@ const useStompSubscription = ({
     };
   }, [
     clientSocket,
+    destination,
     handleSocketMessage,
     readyToSubscribe,
     subscribeOn,
-    destination,
   ]);
-
-  return {
-    subscriptionActive,
-    subscriptionRef,
-  };
 };
 
 export default useStompSubscription;

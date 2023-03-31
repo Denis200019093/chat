@@ -1,16 +1,22 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { CircularProgress, Grid } from "@mui/material";
+import { useCookies } from "react-cookie";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import Test from "./pages/Test";
 import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound/NotFound";
-import Messenger from "./pages/Messenger";
 import Profile from "./pages/Profile";
-import { useCookies } from "react-cookie";
+import Messenger from "./pages/Messenger";
+import NotFound from "./pages/NotFound/NotFound";
+import Chat from "./pages/Messenger/components/Chat";
+import CreateRoom from "./pages/Messenger/components/Chat/components/CreateRoom";
+// import RoomProfile from "./pages/Messenger/components/Chat/components/RoomProfile";
 import { useGetMeQuery } from "./redux/features/auth.api";
 import { getMe } from "./redux/slices/usersSlice";
 import { useAppDispatch } from "./hooks/useRedux";
+
+const RoomProfile = React.lazy(
+  () => import("./pages/Messenger/components/Chat/components/RoomProfile")
+);
 
 const App: React.FC = () => {
   const { data: me } = useGetMeQuery();
@@ -33,8 +39,9 @@ const App: React.FC = () => {
         alignItems="center"
       >
         <Routes>
-          <Route path="/" element={<Navigate to="/auth" />} />
-          <Route path="/test" element={<Test />} />
+          <Route path="/" element={<Navigate to="/auth" />}>
+            <Route path="chatroom/:id" element={<Chat />} />
+          </Route>
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Navigate to="/auth" />} />
           <Route path="*" element={<NotFound />} />
@@ -52,11 +59,23 @@ const App: React.FC = () => {
       alignItems="center"
     >
       <Routes>
-        <Route path="/" element={<Messenger />} />
+        <Route path="/" element={<Messenger />}>
+          <Route path="chatroom/:id" element={<Chat />}>
+            <Route
+              path=""
+              element={
+                <React.Suspense fallback={<CircularProgress />}>
+                  <RoomProfile />
+                </React.Suspense>
+              }
+            />
+          </Route>
+        </Route>
         <Route path="/auth" element={<Navigate to="/" />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {/* <CreateRoom /> */}
     </Grid>
   );
 };

@@ -5,7 +5,7 @@ export const messagesApi = chatRoomsApi.injectEndpoints({
   endpoints: (build) => ({
     getMessages: build.query<
       MessagesData,
-      { roomId: number; pageCount: number }
+      { roomId: string | undefined; pageCount: number }
     >({
       query: ({ roomId, pageCount }) => ({
         url: `/chatrooms/${roomId}/messages?page=${pageCount}`,
@@ -13,7 +13,7 @@ export const messagesApi = chatRoomsApi.injectEndpoints({
     }),
     sendMessage: build.mutation<
       IMessage[],
-      { roomId: number; content: string }
+      { roomId: string | undefined; content: string }
     >({
       query: ({ content, roomId }) => ({
         url: `/chatrooms/${roomId}/messages`,

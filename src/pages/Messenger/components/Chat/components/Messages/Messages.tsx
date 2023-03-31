@@ -1,39 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-import { TransitionGroup } from "react-transition-group";
-import {
-  Button,
-  Collapse,
-  Grid,
-  IconButton,
-  styled,
-  keyframes,
-} from "@mui/material";
+import { Grid, styled, keyframes } from "@mui/material";
 
 import SouthIcon from "@mui/icons-material/South";
 
 import Message from "./components/Message";
-import useScrollBottom from "src/hooks/useScrollBottom";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
 import { getMessages } from "src/redux/slices/messagesSlice";
-
-interface IProps {
-  blockRef: React.MutableRefObject<HTMLDivElement>;
-  scrollToBottom: () => void;
-}
+import { useParams } from "react-router-dom";
 
 const Messages: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [pageCount, setPageCount] = useState<number>(0);
 
+  const refToScroll = useRef<HTMLDivElement | null>(null);
+
   const { messages } = useAppSelector((state) => state.messages);
-  const { roomId } = useAppSelector((state) => state.room);
 
   const dispatch = useAppDispatch();
-
-  // const blockRef = useScrollBottom([messages]);
-  const refToScroll = React.useRef<HTMLDivElement | null>(null);
+  const { id: roomId } = useParams();
 
   const {
     data: receivedMessages,
@@ -88,7 +74,7 @@ const Messages: React.FC = () => {
     >
       <Grid ref={refToScroll} container item xs={11}>
         {messages.map((message, index) => (
-          <Grid container ref={index === 4 ? ref : null}>
+          <Grid container ref={index === 4 ? ref : null} key={message.id}>
             <Message key={message.id} message={message} />
           </Grid>
         ))}
