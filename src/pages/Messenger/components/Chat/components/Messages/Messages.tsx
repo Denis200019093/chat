@@ -74,6 +74,7 @@ const Messages: React.FC = () => {
       chatBottomRef.current?.removeEventListener("scroll", handleScroll);
     };
   }, [handleScroll]);
+  console.log(showScrollButton, chatBottomRef.current);
 
   useEffect(() => {
     if (!showScrollButton && chatBottomRef.current)
@@ -87,12 +88,12 @@ const Messages: React.FC = () => {
       item
       sx={{
         height: "100%",
-        backgroundImage:
-          !receivedMessages?.content.length &&
-          !messages.content.length &&
-          !isLoading
-            ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
-            : null,
+        // backgroundImage:
+        //   !receivedMessages?.content.length &&
+        //   !messages.content.length &&
+        //   !isLoading
+        //     ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
+        //     : null,
         backgroundRepeat: "no-repeat",
         backgroundSize: "20%",
         backgroundPosition: "center",
@@ -102,8 +103,6 @@ const Messages: React.FC = () => {
     >
       <Grid ref={refToScroll} container item xs={11}>
         {messages.content.length &&
-          !isLoading &&
-          !isFetching &&
           messages.content.map((message, index) => (
             <Message
               key={message.id}
