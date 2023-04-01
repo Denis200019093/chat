@@ -45,6 +45,9 @@ export interface IMessage {
 
 export interface MessagesData extends PaginationValues {
   content: IMessage[];
+  totalPage: number;
+  pageCount: number;
+  currentRoomId: string | undefined;
 }
 
 // Data for sending a message

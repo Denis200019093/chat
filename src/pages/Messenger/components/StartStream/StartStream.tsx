@@ -10,6 +10,7 @@ import {
 } from "src/redux/features/stream.api";
 import { setStreamId, unsetReadyStream } from "src/redux/slices/streamSlice";
 import { showRoomProfile } from "src/redux/slices/modesSlice";
+import { useParams } from "react-router-dom";
 
 interface IProps {
   clientSocket: Stomp.Client | null;
@@ -22,14 +23,14 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [username: string]: RTCPeerConnection;
   }>({});
 
-  const [startStream] = useLazyStartStreamQuery();
+  const dispatch = useAppDispatch();
   const [endStream] = useLazyEndStreamQuery();
-  const { roomId } = useAppSelector((state) => state.room);
+  const [startStream] = useLazyStartStreamQuery();
+
+  const { id: roomId } = useParams();
   const { isReadyToStream } = useAppSelector((state) => state.stream);
 
   const currentStream = useRef<HTMLVideoElement>(null);
-
-  const dispatch = useAppDispatch();
 
   const handleStartStream = async () => {
     try {
@@ -176,7 +177,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [createConnectionStream, peerConnections]
   );
 
-  const { subscriptionActive } = useStompSubscription({
+  useStompSubscription({
     roomId,
     clientSocket,
     readyToSubscribe: isStreaming,

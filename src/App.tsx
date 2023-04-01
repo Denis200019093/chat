@@ -7,13 +7,14 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Messenger from "./pages/Messenger";
 import NotFound from "./pages/NotFound/NotFound";
-import Chat from "./pages/Messenger/components/Chat";
+// import Chat from "./pages/Messenger/components/Chat";
 import CreateRoom from "./pages/Messenger/components/Chat/components/CreateRoom";
 // import RoomProfile from "./pages/Messenger/components/Chat/components/RoomProfile";
 import { useGetMeQuery } from "./redux/features/auth.api";
 import { getMe } from "./redux/slices/usersSlice";
 import { useAppDispatch } from "./hooks/useRedux";
 
+const Chat = React.lazy(() => import("./pages/Messenger/components/Chat"));
 const RoomProfile = React.lazy(
   () => import("./pages/Messenger/components/Chat/components/RoomProfile")
 );
@@ -60,7 +61,14 @@ const App: React.FC = () => {
     >
       <Routes>
         <Route path="/" element={<Messenger />}>
-          <Route path="chatroom/:id" element={<Chat />}>
+          <Route
+            path="chatroom/:id"
+            element={
+              <React.Suspense>
+                <Chat />
+              </React.Suspense>
+            }
+          >
             <Route
               path=""
               element={

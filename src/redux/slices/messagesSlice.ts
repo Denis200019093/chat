@@ -1,14 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { IMessage } from "../../types/root";
+import { IMessage, MessagesData } from "../../types/root";
 
 interface IState {
-  messages: IMessage[];
-  // messages: {
-  //   content: IMessage[];
-  //   totalPages: number;
-  //   pageCount: number;
-  // };
+  // messages: IMessage[];
+  messages: {
+    content: IMessage[];
+    totalPages: number | null;
+    currentRoomId: string | null | undefined;
+  };
+  pageCount: number;
   editStatus: {
     isEditing: boolean;
     messageId: number | null;
@@ -17,7 +18,12 @@ interface IState {
 }
 
 const initialState: IState = {
-  messages: [],
+  messages: {
+    content: [],
+    totalPages: null,
+    currentRoomId: null,
+  },
+  pageCount: 0,
   editStatus: {
     isEditing: false,
     messageId: null,
@@ -29,14 +35,21 @@ const messagesSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    getMessages(state, action: PayloadAction<IMessage[]>) {
-      state.messages = [...action.payload, ...state.messages];
+    getMessages(state, action: PayloadAction<MessagesData>) {
+      state.messages = {
+        content: [...action.payload.content, ...state.messages.content],
+        totalPages: action.payload.totalPages,
+        currentRoomId: action.payload.currentRoomId,
+      };
+    },
+    nextPage(state) {
+      state.pageCount = state.pageCount + 1;
     },
     addMessage(state, action: PayloadAction<IMessage>) {
-      state.messages = [...state.messages, action.payload];
+      state.messages.content = [...state.messages.content, action.payload];
     },
     deleteMessage(state, action: PayloadAction<number>) {
-      state.messages = state.messages.filter(
+      state.messages.content = state.messages.content.filter(
         (message) => message.id !== action.payload
       );
     },
@@ -44,7 +57,7 @@ const messagesSlice = createSlice({
       state,
       action: PayloadAction<{ content: string; messageId: number }>
     ) {
-      state.messages = state.messages.map((message) => {
+      state.messages.content = state.messages.content.map((message) => {
         if (message.id === action.payload.messageId) {
           return {
             ...message,
@@ -73,13 +86,15 @@ const messagesSlice = createSlice({
       };
     },
     clear(state) {
-      state.messages = [];
+      state.messages.content = [];
+      state.messages.totalPages = null;
     },
   },
 });
 
 export const {
   getMessages,
+  nextPage,
   addMessage,
   deleteMessage,
   editMessage,

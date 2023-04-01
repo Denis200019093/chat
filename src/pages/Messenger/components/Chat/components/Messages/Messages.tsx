@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import { useParams } from "react-router-dom";
 import { Grid, styled, keyframes } from "@mui/material";
 
 import SouthIcon from "@mui/icons-material/South";
@@ -7,16 +8,15 @@ import SouthIcon from "@mui/icons-material/South";
 import Message from "./components/Message";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import { getMessages } from "src/redux/slices/messagesSlice";
-import { useParams } from "react-router-dom";
+import { clear, getMessages, nextPage } from "src/redux/slices/messagesSlice";
 
 const Messages: React.FC = () => {
-  const [totalPages, setTotalPages] = useState<number | null>(null);
-  const [pageCount, setPageCount] = useState<number>(0);
+  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
 
+  const { messages, pageCount } = useAppSelector((state) => state.messages);
+
+  const chatBottomRef = useRef<HTMLDivElement | null>(null);
   const refToScroll = useRef<HTMLDivElement | null>(null);
-
-  const { messages } = useAppSelector((state) => state.messages);
 
   const dispatch = useAppDispatch();
   const { id: roomId } = useParams();
@@ -35,34 +35,62 @@ const Messages: React.FC = () => {
 
   const { ref, inView } = useInView({
     threshold: 1,
-    skip: totalPages === pageCount,
+    skip: messages.totalPages === pageCount,
   });
 
   useEffect(() => {
-    if (receivedMessages) {
-      dispatch(getMessages(receivedMessages.content));
-      setTotalPages(receivedMessages.totalPages);
+    if (receivedMessages?.content.length && !isFetching) {
+      dispatch(getMessages({ ...receivedMessages, currentRoomId: roomId }));
     }
-  }, [dispatch, receivedMessages]);
+
+    return () => {
+      if (messages.currentRoomId !== roomId) dispatch(clear());
+    };
+  }, [dispatch, isFetching, messages.currentRoomId, receivedMessages, roomId]);
 
   useEffect(() => {
     if (inView) {
-      setPageCount((prevCount) => prevCount + 1);
+      dispatch(nextPage());
     }
-  }, [inView]);
+  }, [dispatch, inView]);
+
+  const handleScroll = React.useCallback(() => {
+    if (
+      chatBottomRef.current &&
+      chatBottomRef.current.scrollHeight -
+        (chatBottomRef.current.scrollTop + chatBottomRef.current.clientHeight) >
+        150
+    ) {
+      setShowScrollButton(true);
+    } else {
+      setShowScrollButton(false);
+    }
+  }, []);
 
   useEffect(() => {
-    refToScroll.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+    chatBottomRef.current?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      chatBottomRef.current?.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (!showScrollButton && chatBottomRef.current)
+      chatBottomRef.current.scrollTop = chatBottomRef.current.scrollHeight;
+  }, [showScrollButton, messages]);
 
   return (
     <ChatContainer
       container
+      ref={chatBottomRef}
       item
       sx={{
         height: "100%",
         backgroundImage:
-          !messages.length && !isLoading
+          !receivedMessages?.content.length &&
+          !messages.content.length &&
+          !isLoading
             ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
             : null,
         backgroundRepeat: "no-repeat",
@@ -73,17 +101,25 @@ const Messages: React.FC = () => {
       alignItems="flex-end"
     >
       <Grid ref={refToScroll} container item xs={11}>
-        {messages.map((message, index) => (
-          <Grid container ref={index === 4 ? ref : null} key={message.id}>
-            <Message key={message.id} message={message} />
-          </Grid>
-        ))}
+        {messages.content.length &&
+          !isLoading &&
+          !isFetching &&
+          messages.content.map((message, index) => (
+            <Message
+              key={message.id}
+              index={index}
+              ref={ref}
+              message={message}
+            />
+          ))}
       </Grid>
-      {!messages.length && !isLoading ? (
-        <Grid container justifyContent="center">
-          <ArrowIcon />
-        </Grid>
-      ) : null}
+      {!receivedMessages?.content.length &&
+        !messages.content.length &&
+        !isLoading && (
+          <Grid container justifyContent="center">
+            <ArrowIcon />
+          </Grid>
+        )}
     </ChatContainer>
   );
 };

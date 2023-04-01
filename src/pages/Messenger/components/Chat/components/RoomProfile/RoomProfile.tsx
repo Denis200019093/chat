@@ -22,6 +22,7 @@ import { useParams } from "react-router-dom";
 const RoomProfile: React.FC = () => {
   const { activeUsers } = useAppSelector((state) => state.users);
   const { showRoomProfile } = useAppSelector((state) => state.modes);
+  console.log("Room profile");
 
   const dispatch = useAppDispatch();
   const { id: roomId } = useParams();
