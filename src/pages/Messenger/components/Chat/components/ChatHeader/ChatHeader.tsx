@@ -3,8 +3,8 @@ import { Avatar, Button, Grid } from "@mui/material";
 
 import Diversity1Icon from "@mui/icons-material/Diversity1";
 
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { setReadyStream } from "src/redux/slices/streamSlice";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { hideRoomProfile, showRoomProfile } from "src/redux/slices/modesSlice";
 
 const ChatHeader: React.FC = () => {

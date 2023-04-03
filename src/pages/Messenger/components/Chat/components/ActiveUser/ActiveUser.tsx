@@ -2,11 +2,11 @@ import React from "react";
 import { Grid, Typography, Avatar, Button } from "@mui/material";
 
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { IUserRoom } from "src/types/root";
-import { setReadyWatch, unsetReadyWatch } from "src/redux/slices/streamSlice";
+import { IUser } from "src/types/root";
+import { setReadyWatch } from "src/redux/slices/streamSlice";
 
 interface IProps {
-  user: IUserRoom;
+  user: IUser;
 }
 
 const ActiveUser: React.FC<IProps> = ({ user }) => {
@@ -17,9 +17,7 @@ const ActiveUser: React.FC<IProps> = ({ user }) => {
   const youStream = me?.username === user.username;
 
   const startWatchStream = () => {
-    if (!youStream) {
-      dispatch(setReadyWatch());
-    }
+    if (!youStream) dispatch(setReadyWatch());
   };
 
   return (

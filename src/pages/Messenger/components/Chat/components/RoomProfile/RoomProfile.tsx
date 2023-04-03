@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import Stomp from "stompjs";
+import React, { useEffect } from "react";
 import {
   Grid,
   Typography,
@@ -11,10 +10,10 @@ import {
 import DescriptionIcon from "@mui/icons-material/Description";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
-import ActiveUser from "../../../ActiveUser";
+import ActiveUser from "../ActiveUser";
 import MultiLineText from "src/components/MultiLineText";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { useGetRoomInfoQuery } from "src/redux/features/chatRooms.api";
+import { useGetRoomInfoQuery } from "src/redux/features/room.api";
 import { getActiveUsers } from "src/redux/slices/usersSlice";
 import { hideRoomProfile } from "src/redux/slices/modesSlice";
 import { useParams } from "react-router-dom";
@@ -22,7 +21,6 @@ import { useParams } from "react-router-dom";
 const RoomProfile: React.FC = () => {
   const { activeUsers } = useAppSelector((state) => state.users);
   const { showRoomProfile } = useAppSelector((state) => state.modes);
-  console.log("Room profile");
 
   const dispatch = useAppDispatch();
   const { id: roomId } = useParams();
@@ -31,14 +29,14 @@ const RoomProfile: React.FC = () => {
     (state) => state.stream
   );
 
-  const { data: roomInfo, isLoading } = useGetRoomInfoQuery(roomId, {
+  const { data: roomInfo, isFetching } = useGetRoomInfoQuery(roomId, {
     refetchOnMountOrArgChange: true,
     skip: !roomId,
   });
 
   useEffect(() => {
-    if (roomInfo && roomInfo.users.length && roomId)
-      dispatch(getActiveUsers(roomInfo.users));
+    if (roomInfo && roomInfo.activeUsers?.length && roomId)
+      dispatch(getActiveUsers(roomInfo.activeUsers));
   }, [dispatch, roomId, roomInfo]);
 
   return (
@@ -96,9 +94,13 @@ const RoomProfile: React.FC = () => {
               <Typography>Members ({activeUsers.length})</Typography>
             </Grid>
             <Grid container item spacing={1}>
-              {activeUsers.map((user) => (
-                <ActiveUser key={user.username} user={user} />
-              ))}
+              {isFetching ? (
+                <CircularProgress />
+              ) : (
+                activeUsers.map((user) => (
+                  <ActiveUser key={user.username} user={user} />
+                ))
+              )}
             </Grid>
           </Grid>
         </Grid>

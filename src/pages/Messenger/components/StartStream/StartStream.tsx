@@ -3,14 +3,14 @@ import Stomp from "stompjs";
 import { Button, Grid } from "@mui/material";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { setStreamId, unsetReadyStream } from "src/redux/slices/streamSlice";
+import { showRoomProfile } from "src/redux/slices/modesSlice";
+import { useAppDispatch } from "src/hooks/useRedux";
+import { useParams } from "react-router-dom";
 import {
   useLazyEndStreamQuery,
   useLazyStartStreamQuery,
 } from "src/redux/features/stream.api";
-import { setStreamId, unsetReadyStream } from "src/redux/slices/streamSlice";
-import { showRoomProfile } from "src/redux/slices/modesSlice";
-import { useParams } from "react-router-dom";
 
 interface IProps {
   clientSocket: Stomp.Client | null;
@@ -23,12 +23,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [username: string]: RTCPeerConnection;
   }>({});
 
-  const dispatch = useAppDispatch();
   const [endStream] = useLazyEndStreamQuery();
   const [startStream] = useLazyStartStreamQuery();
 
+  const dispatch = useAppDispatch();
+
   const { id: roomId } = useParams();
-  const { isReadyToStream } = useAppSelector((state) => state.stream);
 
   const currentStream = useRef<HTMLVideoElement>(null);
 
@@ -71,9 +71,9 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     };
 
     return () => {
-      handleStopStream();
+      if (stream) handleStopStream();
     };
-  }, [dispatch, endStream, isReadyToStream, stream]);
+  }, [dispatch, endStream, stream]);
 
   const createConnectionStream = useCallback(
     async (username: string) => {

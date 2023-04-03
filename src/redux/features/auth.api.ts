@@ -1,14 +1,9 @@
-import { SerializedError } from "@reduxjs/toolkit";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query/fetchBaseQuery";
-import { AuthData, IUser } from "../../types/root";
-import { chatRoomsApi } from "./chatRooms.api";
+import { AuthData, IUser, ResponseWithToken } from "../../types/root";
+import { api } from "./api";
 
-export const authApi = chatRoomsApi.injectEndpoints({
+export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
-    signUp: build.mutation<
-      { data: void } | { error: FetchBaseQueryError | SerializedError },
-      AuthData
-    >({
+    signUp: build.mutation<void, AuthData>({
       query: ({ username, password }) => ({
         url: "/register",
         method: "POST",
@@ -18,7 +13,7 @@ export const authApi = chatRoomsApi.injectEndpoints({
         },
       }),
     }),
-    signIn: build.mutation<{ token: string }, AuthData>({
+    signIn: build.mutation<ResponseWithToken, AuthData>({
       query: ({ username, password }) => ({
         url: "/login",
         method: "POST",

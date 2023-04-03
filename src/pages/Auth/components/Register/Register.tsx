@@ -3,8 +3,9 @@ import styled from "styled-components";
 import { Button, Typography, Grid } from "@mui/material";
 
 import CustomInput from "src/components/CustomInput";
-import { useForm } from "react-hook-form";
 import { useSignUpMutation } from "src/redux/features/auth.api";
+import { handleError } from "src/helpers/handleError";
+import { useForm } from "react-hook-form";
 import { AuthData } from "src/types/root";
 
 interface IProps {
@@ -20,7 +21,8 @@ const Register: React.FC<IProps> = ({
   setUsername,
   setPassword,
 }) => {
-  const [signUp, { isLoading }] = useSignUpMutation();
+  const [signUp, { isLoading, isError, error }] = useSignUpMutation();
+  console.log(isError, error);
 
   const {
     handleSubmit,
@@ -47,13 +49,14 @@ const Register: React.FC<IProps> = ({
           username: "",
           password: "",
         });
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
+
+        handleError(error);
       }
     },
     [reset, setPassword, setUsername, signUp, toggleSignIn]
   );
-  console.log(errors);
 
   return (
     <SignUpContainer signingIn={signingIn}>

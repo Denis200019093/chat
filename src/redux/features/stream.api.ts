@@ -1,6 +1,7 @@
-import { chatRoomsApi } from "./chatRooms.api";
+import { IRoom } from "src/types/root";
+import { api } from "./api";
 
-export const streamApi = chatRoomsApi.injectEndpoints({
+export const streamApi = api.injectEndpoints({
   endpoints: (build) => ({
     startStream: build.query<void, string | undefined>({
       query: (roomId) => ({
@@ -10,6 +11,11 @@ export const streamApi = chatRoomsApi.injectEndpoints({
     endStream: build.query<void, void>({
       query: () => ({
         url: "/stream/end",
+      }),
+    }),
+    changeStreamState: build.query<IRoom, number>({
+      query: (roomId) => ({
+        url: `/chatrooms/${roomId}/stream`,
       }),
     }),
   }),

@@ -1,20 +1,17 @@
-// User fields
 export interface IUser {
-  id: number;
   username: string;
   userStreaming: boolean;
+  id?: number;
   avatarUrl?: string;
 }
 
-export interface IUserBasicData extends IUser {
+export interface IUserBasicData {
   username: string;
   userStreaming: boolean;
 }
 
-// Room fields
-export interface IUserRoom {
-  username: string;
-  userStreaming: boolean;
+export interface ResponseWithToken {
+  token: string;
 }
 
 export interface IRoom {
@@ -22,20 +19,28 @@ export interface IRoom {
   streamOn: boolean;
   name: string;
   description: string;
-  users: IUserRoom[];
+  activeUsers: IUser[];
 }
 
 export interface PaginationValues {
   size: number;
   totalElements: number;
   totalPages: number;
+  last: boolean;
+  first: boolean;
+  empty: boolean;
 }
 
 export interface RoomsData extends PaginationValues {
   content: IRoom[];
 }
 
-// Message fields
+export interface MessagesData extends PaginationValues {
+  content: IMessage[];
+  pageCount: number;
+  currentRoomId: string | undefined;
+}
+
 export interface IMessage {
   id: number;
   content: string;
@@ -43,27 +48,15 @@ export interface IMessage {
   user: IUser;
 }
 
-export interface MessagesData extends PaginationValues {
-  content: IMessage[];
-  totalPage: number;
-  pageCount: number;
-  currentRoomId: string | undefined;
-}
-
-// Data for sending a message
 export interface ISendMessageData {
   content: string;
-  totalElements: number;
-  totalPages: number;
 }
 
-// Data for login/register
 export interface AuthData {
   username: string;
   password: string;
 }
 
-// Data to create a room
 export interface CreateRoomData {
   name: string;
   description: string;

@@ -29,8 +29,11 @@ const Message = forwardRef<HTMLDivElement, IProps>(
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const { me } = useAppSelector((state) => state.users);
+
     const [hoverRef, isHovered] = useHover<HTMLDivElement>();
+
     const [deleteMessage] = useDeleteMessageMutation();
+
     const dispatch = useAppDispatch();
 
     const open = Boolean(anchorEl);
@@ -63,7 +66,7 @@ const Message = forwardRef<HTMLDivElement, IProps>(
     }, [deleteMessage, dispatch, message.content, message.id]);
 
     return (
-      <Grid container ref={index === 8 ? ref : null}>
+      <Grid container ref={index === 4 ? ref : null}>
         <MessageContainer
           container
           ref={hoverRef}

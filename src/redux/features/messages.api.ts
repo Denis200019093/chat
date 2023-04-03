@@ -1,7 +1,7 @@
-import { chatRoomsApi } from "./chatRooms.api";
 import { IMessage, MessagesData } from "../../types/root";
+import { api } from "./api";
 
-export const messagesApi = chatRoomsApi.injectEndpoints({
+export const messagesApi = api.injectEndpoints({
   endpoints: (build) => ({
     getMessages: build.query<
       MessagesData,

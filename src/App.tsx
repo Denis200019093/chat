@@ -9,15 +9,15 @@ import Messenger from "./pages/Messenger";
 import NotFound from "./pages/NotFound/NotFound";
 // import Chat from "./pages/Messenger/components/Chat";
 import CreateRoom from "./pages/Messenger/components/Chat/components/CreateRoom";
-// import RoomProfile from "./pages/Messenger/components/Chat/components/RoomProfile";
+import RoomProfile from "./pages/Messenger/components/Chat/components/RoomProfile";
 import { useGetMeQuery } from "./redux/features/auth.api";
 import { getMe } from "./redux/slices/usersSlice";
 import { useAppDispatch } from "./hooks/useRedux";
 
 const Chat = React.lazy(() => import("./pages/Messenger/components/Chat"));
-const RoomProfile = React.lazy(
-  () => import("./pages/Messenger/components/Chat/components/RoomProfile")
-);
+// const RoomProfile = React.lazy(
+//   () => import("./pages/Messenger/components/Chat/components/RoomProfile")
+// );
 
 const App: React.FC = () => {
   const { data: me } = useGetMeQuery();
@@ -41,7 +41,14 @@ const App: React.FC = () => {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/auth" />}>
-            <Route path="chatroom/:id" element={<Chat />} />
+            <Route
+              path="chatroom/:id"
+              element={
+                <React.Suspense fallback={<CircularProgress />}>
+                  <Chat />
+                </React.Suspense>
+              }
+            />
           </Route>
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Navigate to="/auth" />} />
@@ -64,19 +71,12 @@ const App: React.FC = () => {
           <Route
             path="chatroom/:id"
             element={
-              <React.Suspense>
+              <React.Suspense fallback={<CircularProgress />}>
                 <Chat />
               </React.Suspense>
             }
           >
-            <Route
-              path=""
-              element={
-                <React.Suspense fallback={<CircularProgress />}>
-                  <RoomProfile />
-                </React.Suspense>
-              }
-            />
+            <Route path="" element={<RoomProfile />} />
           </Route>
         </Route>
         <Route path="/auth" element={<Navigate to="/" />} />

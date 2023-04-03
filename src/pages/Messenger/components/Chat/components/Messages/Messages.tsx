@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useParams } from "react-router-dom";
 import { Grid, styled, keyframes } from "@mui/material";
@@ -6,20 +6,22 @@ import { Grid, styled, keyframes } from "@mui/material";
 import SouthIcon from "@mui/icons-material/South";
 
 import Message from "./components/Message";
+import useScrollBottomChat from "src/hooks/useScrollBottomChat";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import { clear, getMessages, nextPage } from "src/redux/slices/messagesSlice";
+import {
+  clear,
+  clearPageCount,
+  getMessages,
+  nextPage,
+} from "src/redux/slices/messagesSlice";
 
 const Messages: React.FC = () => {
-  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
-
   const { messages, pageCount } = useAppSelector((state) => state.messages);
-
-  const chatBottomRef = useRef<HTMLDivElement | null>(null);
-  const refToScroll = useRef<HTMLDivElement | null>(null);
+  const { chatScrollRef } = useScrollBottomChat(messages);
+  const { id: roomId } = useParams();
 
   const dispatch = useAppDispatch();
-  const { id: roomId } = useParams();
 
   const {
     data: receivedMessages,
@@ -35,16 +37,19 @@ const Messages: React.FC = () => {
 
   const { ref, inView } = useInView({
     threshold: 1,
-    skip: messages.totalPages === pageCount,
+    skip: receivedMessages?.last,
   });
 
   useEffect(() => {
-    if (receivedMessages?.content.length && !isFetching) {
+    if (receivedMessages?.content && !isFetching) {
       dispatch(getMessages({ ...receivedMessages, currentRoomId: roomId }));
     }
 
     return () => {
-      if (messages.currentRoomId !== roomId) dispatch(clear());
+      if (messages.currentRoomId !== roomId) {
+        dispatch(clearPageCount());
+        dispatch(clear());
+      }
     };
   }, [dispatch, isFetching, messages.currentRoomId, receivedMessages, roomId]);
 
@@ -54,46 +59,19 @@ const Messages: React.FC = () => {
     }
   }, [dispatch, inView]);
 
-  const handleScroll = React.useCallback(() => {
-    if (
-      chatBottomRef.current &&
-      chatBottomRef.current.scrollHeight -
-        (chatBottomRef.current.scrollTop + chatBottomRef.current.clientHeight) >
-        150
-    ) {
-      setShowScrollButton(true);
-    } else {
-      setShowScrollButton(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    chatBottomRef.current?.addEventListener("scroll", handleScroll);
-
-    return () => {
-      chatBottomRef.current?.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
-  console.log(showScrollButton, chatBottomRef.current);
-
-  useEffect(() => {
-    if (!showScrollButton && chatBottomRef.current)
-      chatBottomRef.current.scrollTop = chatBottomRef.current.scrollHeight;
-  }, [showScrollButton, messages]);
-
   return (
     <ChatContainer
       container
-      ref={chatBottomRef}
+      ref={chatScrollRef}
       item
       sx={{
         height: "100%",
-        // backgroundImage:
-        //   !receivedMessages?.content.length &&
-        //   !messages.content.length &&
-        //   !isLoading
-        //     ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
-        //     : null,
+        backgroundImage:
+          !receivedMessages?.content.length &&
+          !messages.content.length &&
+          !isLoading
+            ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
+            : null,
         backgroundRepeat: "no-repeat",
         backgroundSize: "20%",
         backgroundPosition: "center",
@@ -101,7 +79,7 @@ const Messages: React.FC = () => {
       justifyContent="center"
       alignItems="flex-end"
     >
-      <Grid ref={refToScroll} container item xs={11}>
+      <Grid container item xs={11}>
         {messages.content.length &&
           messages.content.map((message, index) => (
             <Message

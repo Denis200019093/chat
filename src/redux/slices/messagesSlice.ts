@@ -3,7 +3,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IMessage, MessagesData } from "../../types/root";
 
 interface IState {
-  // messages: IMessage[];
   messages: {
     content: IMessage[];
     totalPages: number | null;
@@ -37,6 +36,7 @@ const messagesSlice = createSlice({
   reducers: {
     getMessages(state, action: PayloadAction<MessagesData>) {
       state.messages = {
+        // content: [...state.messages.content, ...action.payload.content],
         content: [...action.payload.content, ...state.messages.content],
         totalPages: action.payload.totalPages,
         currentRoomId: action.payload.currentRoomId,
@@ -44,6 +44,9 @@ const messagesSlice = createSlice({
     },
     nextPage(state) {
       state.pageCount = state.pageCount + 1;
+    },
+    clearPageCount(state) {
+      state.pageCount = 0;
     },
     addMessage(state, action: PayloadAction<IMessage>) {
       state.messages.content = [...state.messages.content, action.payload];
@@ -88,6 +91,7 @@ const messagesSlice = createSlice({
     clear(state) {
       state.messages.content = [];
       state.messages.totalPages = null;
+      state.messages.currentRoomId = null;
     },
   },
 });
@@ -101,5 +105,6 @@ export const {
   startEdit,
   endEdit,
   clear,
+  clearPageCount,
 } = messagesSlice.actions;
 export const messagesReducer = messagesSlice.reducer;

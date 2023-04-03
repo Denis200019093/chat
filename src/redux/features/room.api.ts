@@ -1,7 +1,7 @@
-import { IRoom, RoomsData } from "../../types/root";
+import { CreateRoomData, IRoom, RoomsData } from "../../types/root";
 import { api } from "./api";
 
-export const chatRoomsApi = api.injectEndpoints({
+export const roomsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getRooms: build.query<
       RoomsData,
@@ -10,29 +10,23 @@ export const chatRoomsApi = api.injectEndpoints({
       query: ({ pageCount, searchValue }) => ({
         url: `/chatrooms?page=${pageCount}&name=${searchValue}`,
       }),
-      providesTags: [{ type: "Room", id: "Check" }],
+      providesTags: [{ type: "Room", id: "Room" }],
     }),
     getRoomInfo: build.query<IRoom, string | undefined>({
       query: (roomId) => ({
         url: `/chatrooms/${roomId}`,
       }),
     }),
-    createRoom: build.mutation<
-      IRoom,
-      {
-        name: string;
-        description: string;
-      }
-    >({
+    createRoom: build.mutation<IRoom, CreateRoomData>({
       query: (dataRoom) => ({
         url: `/chatrooms`,
         method: "POST",
         body: dataRoom,
       }),
-      invalidatesTags: () => [{ type: "Room", id: "Check" }],
+      invalidatesTags: () => [{ type: "Room", id: "Room" }],
     }),
   }),
 });
 
 export const { useGetRoomsQuery, useGetRoomInfoQuery, useCreateRoomMutation } =
-  chatRoomsApi;
+  roomsApi;

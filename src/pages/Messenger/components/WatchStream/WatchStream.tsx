@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import Stomp from "stompjs";
+import { useParams } from "react-router-dom";
 import { Button, Grid, Typography } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+
 import useStompSubscription from "src/hooks/useStompSubscriptions";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { unsetReadyWatch } from "src/redux/slices/streamSlice";
 
 interface IProps {
@@ -11,13 +13,14 @@ interface IProps {
 
 const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
   const { me } = useAppSelector((state) => state.users);
-  const { roomId } = useAppSelector((state) => state.room);
   const { isReadyToWatch } = useAppSelector((state) => state.stream);
-  
+
   const peerConnection = React.useRef<RTCPeerConnection | null>(null);
   const liveStream = React.useRef<HTMLVideoElement | null>(null);
 
   const dispatch = useAppDispatch();
+
+  const { id: roomId } = useParams();
 
   const handleSocketMessage = React.useCallback(
     async (message: Stomp.Message) => {
@@ -68,7 +71,7 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
     [clientSocket, me?.username, roomId]
   );
 
-  const { subscriptionActive } = useStompSubscription({
+  useStompSubscription({
     roomId,
     clientSocket,
     handleSocketMessage,

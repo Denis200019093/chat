@@ -1,11 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { Grid, styled } from "@mui/material";
 
-import SidebarHeader from "./components/SidebarHeader";
 import Rooms from "./components/Rooms";
+import SidebarHeader from "./components/SidebarHeader";
 import CustomInput from "src/components/CustomInput";
+import useDebounce from "src/hooks/useDebounce";
 
-const Sidebar: React.FC = () => {
+const RoomsSidebar: React.FC = () => {
+  const {
+    handleSubmit,
+    register,
+    getValues,
+    watch,
+    formState: { errors },
+  } = useForm<{ name: string }>({
+    mode: "onSubmit",
+  });
+
+  const nameValue = watch("name");
+
+  const debouncedValue = useDebounce(nameValue);
+
   return (
     <Grid
       container
@@ -15,16 +31,21 @@ const Sidebar: React.FC = () => {
     >
       <Grid item xs={11}>
         <SidebarHeader />
-        <CustomInput placeholder="Search" fullWidth />
+        <CustomInput
+          {...register("name")}
+          defaultValue=""
+          name="name"
+          placeholder="Room name..."
+        />
       </Grid>
       <RoomsContainer item>
-        <Rooms />
+        <Rooms searchValue={debouncedValue} />
       </RoomsContainer>
     </Grid>
   );
 };
 
-export default Sidebar;
+export default RoomsSidebar;
 
 const RoomsContainer = styled(Grid)({
   overflowY: "auto",

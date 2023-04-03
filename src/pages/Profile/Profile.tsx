@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { useUploadAvatarMutation } from "src/redux/features/fileUpload.api";
+import { useUploadAvatarMutation } from "src/redux/features/api";
 
 interface FormData {
   file: File[];
@@ -19,9 +19,9 @@ const Profile: React.FC = () => {
       const formData = new FormData();
       formData.append("image", data.file[0]);
 
-      console.log(formData);
+      // console.log(formData);
       const url = await uploadAvatar(formData);
-      console.log(url);
+      // console.log(url);
     } catch (err) {
       setError("Error uploading avatar");
     }

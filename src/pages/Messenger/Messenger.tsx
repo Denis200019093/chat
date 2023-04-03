@@ -3,11 +3,11 @@ import Stomp from "stompjs";
 import { Grid } from "@mui/material";
 import { useCookies } from "react-cookie";
 
-import Sidebar from "./components/Sidebar";
-import { createStompClient } from "src/configs/stomp";
-import { useAppSelector } from "src/hooks/useRedux";
-import { Outlet } from "react-router-dom";
+import RoomsSidebar from "./components/RoomsSidebar";
 import CreateRoom from "./components/Chat/components/CreateRoom";
+import { Outlet } from "react-router-dom";
+import { useAppSelector } from "src/hooks/useRedux";
+import { createStompClient } from "src/configs/stomp";
 
 const StartStream = lazy(() => import("./components/StartStream"));
 const WatchStream = lazy(() => import("./components/WatchStream"));
@@ -52,8 +52,8 @@ const Messenger: React.FC = () => {
 
   return (
     <Grid container sx={{ height: "100vh", position: "relative" }}>
-      <Grid item xs={2}>
-        <Sidebar />
+      <Grid item sx={{ height: "100%" }} xs={2}>
+        <RoomsSidebar />
       </Grid>
       <Grid item xs={isReadyToStream || isReadyToWatch ? 7.25 : 0}>
         {isReadyToStream && (

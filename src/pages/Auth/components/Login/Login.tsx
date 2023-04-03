@@ -1,19 +1,16 @@
 import React, { useCallback, useEffect } from "react";
-import { Button, Grid, TextField, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import styled from "styled-components";
 
 import CustomInput from "src/components/CustomInput";
-import { useCookies } from "react-cookie";
-import { useNavigate } from "react-router-dom";
 import { useSignInMutation } from "src/redux/features/auth.api";
-import { AuthData } from "src/types/root";
-import { useForm } from "react-hook-form";
-import {
-  isErrorWithMessage,
-  isFetchBaseQueryError,
-} from "src/helpers/handleError";
+import { handleError } from "src/helpers/handleError";
 import { getMe } from "src/redux/slices/usersSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { AuthData } from "src/types/root";
+import { useForm } from "react-hook-form";
 
 interface IProps {
   signingIn: boolean;
@@ -23,7 +20,6 @@ interface IProps {
 
 const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
   const [signIn, { isLoading }] = useSignInMutation();
-  console.log(username);
 
   const [cookies, setCookie] = useCookies(["token"]);
 
@@ -59,16 +55,8 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
             expires: new Date(Date.now() + 10000000),
           });
         }
-      } catch (err) {
-        console.log(err);
-
-        // if (isFetchBaseQueryError(err)) {
-        //   const errMsg = "error" in err ? err.error : JSON.stringify(err.data);
-        //   console.log(errMsg);
-        //   alert("Somthing went wrong, try again");
-        // } else if (isErrorWithMessage(err)) {
-        //   console.log(err.message);
-        // }
+      } catch (error) {
+        handleError(error);
       }
     },
     [dispatch, navigate, setCookie, signIn]
