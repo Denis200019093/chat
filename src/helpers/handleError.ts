@@ -27,22 +27,20 @@ function isErrorWithData(error: unknown): error is { data: string } {
   );
 }
 
-export const handleError = (error: unknown) => {
-  if (isFetchBaseQueryError(error)) {
-    console.log(error);
+// function isErrorWithData(error: unknown): error is { data: string } {
+//   return (
+//     typeof error === "object" &&
+//     error != null &&
+//     "data" in error &&
+//     typeof error.data === "string"
+//   );
+// }
 
-    // const errMsg = "data" in error ? error.data : JSON.stringify(error.data);
-    // const errMsg = "error" in error ? error.error : JSON.stringify(error.data);
-    alert(error);
-  } else if (isErrorWithData(error)) {
+export const handleError = (error: unknown) => {
+  if (isErrorWithData(error)) {
     // const errData = "data" in error ? error.data : JSON.stringify(error.data);
     // const errMsg = "error" in error ? error.error : JSON.stringify(error.data);
     alert(error.data);
-  } else if (isErrorWithMessage(error)) {
-    // const errMsg =
-    // "message" in error ? error.message : JSON.stringify(error.message);
-    // const errMsg = "error" in error ? error.error : JSON.stringify(error.data);
-    alert(error.message);
   } else {
     console.log("An unexpected error occurred:", error);
     alert("An unexpected error occurred. Please try again later.");

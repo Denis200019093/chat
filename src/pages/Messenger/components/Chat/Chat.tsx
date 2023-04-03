@@ -8,7 +8,7 @@ import ChatHeader from "./components/ChatHeader";
 import RoomProfile from "./components/RoomProfile";
 import SendMessageBar from "./components/SendMessageBar";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { useAppDispatch } from "src/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import {
   addMessage,
   deleteMessage,
@@ -27,6 +27,10 @@ interface MessageHeaders {
 
 const Chat: React.FC = () => {
   const [clientSocket] = useOutletContext<any>();
+
+  const { isReadyToWatch, isReadyToStream } = useAppSelector(
+    (state) => state.stream
+  );
 
   const dispatch = useAppDispatch();
 
@@ -90,18 +94,22 @@ const Chat: React.FC = () => {
       container
       item
       direction="column"
+      justifyContent="center"
+      alignItems="center"
+      xs={isReadyToStream || isReadyToWatch ? 2.75 : 7.5}
       sx={{
         position: "relative",
         height: "100%",
+        overflow: "hidden",
       }}
     >
-      <Grid container item sx={{ flexShrink: 0, height: "65px" }}>
+      <Grid container item sx={{ height: "65px" }}>
         <ChatHeader />
       </Grid>
-      <Grid item xs>
+      <Grid container item xs>
         <Messages />
       </Grid>
-      <Grid item sx={{ flexShrink: 0 }}>
+      <Grid container item>
         <SendMessageBar />
       </Grid>
       <RoomProfile />

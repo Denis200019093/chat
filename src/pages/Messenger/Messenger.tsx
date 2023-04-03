@@ -5,7 +5,7 @@ import { useCookies } from "react-cookie";
 
 import RoomsSidebar from "./components/RoomsSidebar";
 import CreateRoom from "./components/Chat/components/CreateRoom";
-import { Outlet } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import { useAppSelector } from "src/hooks/useRedux";
 import { createStompClient } from "src/configs/stomp";
 
@@ -19,6 +19,8 @@ const Messenger: React.FC = () => {
   const { isReadyToWatch, isReadyToStream } = useAppSelector(
     (state) => state.stream
   );
+
+  const { id: roomId } = useParams();
 
   useEffect(() => {
     const stompClient = createStompClient();
@@ -67,17 +69,8 @@ const Messenger: React.FC = () => {
           </Suspense>
         )}
       </Grid>
-      <Grid
-        container
-        item
-        justifyContent="center"
-        alignItems="center"
-        sx={{ overflow: "hidden" }}
-        xs={isReadyToStream || isReadyToWatch ? 2.75 : 7.5}
-      >
-        <Outlet context={[clientSocket]} />
-      </Grid>
-      <Grid item xs={5}>
+      <Outlet context={[clientSocket]} />
+      <Grid item xs={10}>
         <CreateRoom />
       </Grid>
     </Grid>

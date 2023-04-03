@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   Grid,
   Typography,
@@ -16,7 +17,6 @@ import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetRoomInfoQuery } from "src/redux/features/room.api";
 import { getActiveUsers } from "src/redux/slices/usersSlice";
 import { hideRoomProfile } from "src/redux/slices/modesSlice";
-import { useParams } from "react-router-dom";
 
 const RoomProfile: React.FC = () => {
   const { activeUsers } = useAppSelector((state) => state.users);

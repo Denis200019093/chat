@@ -28,10 +28,9 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-const CreateRoomForm: React.FC<{
-  onSubmit: (values: CreateRoomData) => void;
-  isLoading: boolean;
-}> = ({ onSubmit, isLoading }) => {
+const CreateRoomForm: React.FC = () => {
+  const [createRoom, { isLoading }] = useCreateRoomMutation();
+
   const {
     handleSubmit,
     register,
@@ -40,11 +39,10 @@ const CreateRoomForm: React.FC<{
   } = useForm<CreateRoomData>({
     mode: "onChange",
   });
-  console.log(errors);
 
   const submitCreateRoom = async (roomValues: CreateRoomData) => {
     try {
-      await onSubmit(roomValues);
+      await createRoom(roomValues);
       reset();
     } catch (error) {
       handleError(error);
@@ -57,7 +55,7 @@ const CreateRoomForm: React.FC<{
         <Grid container item justifyContent="center">
           <Typography variant="h4">Create a new room</Typography>
         </Grid>
-        <Grid item>
+        <Grid container item>
           <Grid container spacing={2}>
             <Grid container item>
               <CustomInput
@@ -93,45 +91,57 @@ const CreateRoomForm: React.FC<{
   );
 };
 
-const CreateRoom: React.FC = () => {
-  const [createRoom, { isLoading }] = useCreateRoomMutation();
+// Component appears if creatingRoom = false or roomId === null
+const CreateRoomGrid = () => {
+  return (
+    <Grid
+      container
+      item
+      sx={{ height: "100%" }}
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Grid item xs={5} sx={{ bgcolor: "rgb(35,35,35)", p: 3 }}>
+        <CreateRoomForm />
+      </Grid>
+    </Grid>
+  );
+};
 
+// Component appears if creatingRoom = true or roomId !== null
+const CreateRoomDialog = () => {
   const { creatingRoom } = useAppSelector((state) => state.modes);
 
-  const { id: roomId } = useParams();
   const dispatch = useAppDispatch();
 
   const hideDialog = () => dispatch(hideCreateRoomModal());
 
-  if (creatingRoom || roomId) {
-    return (
-      <Dialog
-        open={creatingRoom}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={hideDialog}
-      >
-        <CreateRoomContainer>
-          <DialogContent>
-            <Grid container justifyContent="center">
-              <CreateRoomForm onSubmit={createRoom} isLoading={isLoading} />
-            </Grid>
-          </DialogContent>
-        </CreateRoomContainer>
-      </Dialog>
-    );
-  }
+  return (
+    <Dialog
+      open={creatingRoom}
+      TransitionComponent={Transition}
+      keepMounted
+      onClose={hideDialog}
+    >
+      <Grid item sx={{ bgcolor: "rgb(35,35,35)", p: 3 }}>
+        <DialogContent>
+          <Grid container justifyContent="center">
+            <CreateRoomForm />
+          </Grid>
+        </DialogContent>
+      </Grid>
+    </Dialog>
+  );
+};
+
+const CreateRoom: React.FC = () => {
+  const { creatingRoom } = useAppSelector((state) => state.modes);
+
+  const { id: roomId } = useParams();
 
   return (
-    <CreateRoomContainer item>
-      <CreateRoomForm onSubmit={createRoom} isLoading={isLoading} />
-    </CreateRoomContainer>
+    <>{creatingRoom || roomId ? <CreateRoomDialog /> : <CreateRoomGrid />}</>
   );
 };
 
 export default CreateRoom;
-
-const CreateRoomContainer = styled(Grid)({
-  backgroundColor: "rgb(35,35,35)",
-  padding: "24px",
-});

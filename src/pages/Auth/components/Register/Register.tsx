@@ -50,8 +50,6 @@ const Register: React.FC<IProps> = ({
           password: "",
         });
       } catch (error) {
-        console.log(error);
-
         handleError(error);
       }
     },

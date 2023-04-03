@@ -1,11 +1,12 @@
 export interface IUser {
   username: string;
   userStreaming: boolean;
-  id?: number;
+  id: number;
   avatarUrl?: string;
 }
 
 export interface IUserBasicData {
+  id?: number;
   username: string;
   userStreaming: boolean;
 }
