@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUser, IUserBasicData } from "src/types/root";
+import { IUser, IUserBasicData, StreamerData } from "src/types/root";
 
 type UserData = IUser | IUserBasicData;
 
@@ -23,7 +23,7 @@ const usersSlice = createSlice({
     getActiveUsers(state, action: PayloadAction<IUser[]>) {
       state.activeUsers = action.payload;
     },
-    setActiveUser(state, action: PayloadAction<UserData>) {
+    setActiveUser(state, action: PayloadAction<IUser>) {
       const foundUser = state.activeUsers.find(
         (item) => item.username === action.payload.username
       );
@@ -36,18 +36,78 @@ const usersSlice = createSlice({
         (user) => user.username !== action.payload
       );
     },
-    setUserStreamingTrue(state, action: PayloadAction<string>) {
-      state.activeUsers.map((item) => {
-        if (item.username === action.payload) {
-          return (item.userStreaming = true);
+    setStreamStatusOfUser(state, action: PayloadAction<StreamerData>) {
+      state.activeUsers = state.activeUsers.map((streamer) => {
+        if (streamer.username === action.payload.streamer) {
+          return {
+            ...streamer,
+            stream: action.payload,
+          };
         }
+        return streamer;
       });
     },
-    setUserStreamingFalse(state, action: PayloadAction<string>) {
-      state.activeUsers.map((item) => {
-        if (item.username === action.payload) {
-          return (item.userStreaming = false);
+    deleteStreamStatusOfUser(state, action: PayloadAction<string>) {
+      state.activeUsers = state.activeUsers.map((streamer) => {
+        if (streamer.username === action.payload) {
+          return {
+            ...streamer,
+            stream: (streamer.stream = null),
+          };
         }
+        return streamer;
+      });
+    },
+    setViewer(
+      state,
+      action: PayloadAction<{
+        viewerUsername: string;
+        streamerName: string;
+      }>
+    ) {
+      state.activeUsers = state.activeUsers.map((streamer) => {
+        if (
+          streamer.username === action.payload.streamerName &&
+          streamer.stream
+        ) {
+          return {
+            ...streamer,
+            stream: {
+              ...streamer.stream,
+              viewers: [
+                ...streamer.stream.viewers,
+                action.payload.viewerUsername,
+              ],
+            },
+          };
+        }
+        return streamer;
+      });
+    },
+    deleteViewer(
+      state,
+      action: PayloadAction<{
+        viewerUsername: string;
+        streamerName: string;
+      }>
+    ) {
+      state.activeUsers = state.activeUsers.map((streamer) => {
+        if (
+          streamer.stream &&
+          streamer.stream.viewers.includes(action.payload.viewerUsername) &&
+          streamer.username === action.payload.streamerName
+        ) {
+          return {
+            ...streamer,
+            stream: {
+              ...streamer.stream,
+              viewers: streamer.stream.viewers.filter(
+                (viewer) => viewer !== action.payload.viewerUsername
+              ),
+            },
+          };
+        }
+        return streamer;
       });
     },
   },
@@ -58,7 +118,9 @@ export const {
   setActiveUser,
   deleteActiveUser,
   getMe,
-  setUserStreamingTrue,
-  setUserStreamingFalse,
+  setViewer,
+  deleteViewer,
+  setStreamStatusOfUser,
+  deleteStreamStatusOfUser,
 } = usersSlice.actions;
 export const usersReducer = usersSlice.reducer;

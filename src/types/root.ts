@@ -1,6 +1,12 @@
+export interface StreamerData {
+  id: number;
+  streamer: string;
+  viewers: string[];
+}
+
 export interface IUser {
   username: string;
-  userStreaming: boolean;
+  stream: StreamerData | null;
   id: number;
   avatarUrl?: string;
 }
@@ -8,7 +14,6 @@ export interface IUser {
 export interface IUserBasicData {
   id?: number;
   username: string;
-  userStreaming: boolean;
 }
 
 export interface ResponseWithToken {

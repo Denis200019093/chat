@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, lazy } from "react";
 import { CircularProgress, Grid } from "@mui/material";
 import { useCookies } from "react-cookie";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -7,17 +7,11 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Messenger from "./pages/Messenger";
 import NotFound from "./pages/NotFound/NotFound";
-// import Chat from "./pages/Messenger/components/Chat";
-import CreateRoom from "./pages/Messenger/components/Chat/components/CreateRoom";
-import RoomProfile from "./pages/Messenger/components/Chat/components/RoomProfile";
-import { useGetMeQuery } from "./redux/features/auth.api";
-import { getMe } from "./redux/slices/usersSlice";
 import { useAppDispatch } from "./hooks/useRedux";
+import { getMe } from "./redux/slices/usersSlice";
+import { useGetMeQuery } from "./redux/features/auth.api";
 
-const Chat = React.lazy(() => import("./pages/Messenger/components/Chat"));
-// const RoomProfile = React.lazy(
-//   () => import("./pages/Messenger/components/Chat/components/RoomProfile")
-// );
+const Chat = lazy(() => import("./pages/Messenger/components/Chat"));
 
 const App: React.FC = () => {
   const { data: me } = useGetMeQuery();
@@ -26,8 +20,8 @@ const App: React.FC = () => {
 
   const dispatch = useAppDispatch();
 
-  React.useEffect(() => {
-    if (me) dispatch(getMe(me));
+  useEffect(() => {
+    if (me?.username) dispatch(getMe(me));
   }, [dispatch, me]);
 
   if (!cookies.token) {
@@ -62,7 +56,7 @@ const App: React.FC = () => {
     <Grid
       container
       item
-      sx={{ height: "100vh", bgcolor: "#1B1C21" }}
+      sx={{ height: "100vh", bgcolor: "#1B1C21", overflow: "hidden" }}
       justifyContent="center"
       alignItems="center"
     >
@@ -75,15 +69,12 @@ const App: React.FC = () => {
                 <Chat />
               </React.Suspense>
             }
-          >
-            <Route path="" element={<RoomProfile />} />
-          </Route>
+          />
         </Route>
         <Route path="/auth" element={<Navigate to="/" />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {/* <CreateRoom /> */}
     </Grid>
   );
 };

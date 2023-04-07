@@ -10,6 +10,7 @@ import { setupStore } from "./redux/store";
 import { CookiesProvider } from "react-cookie";
 
 import "./index.css";
+import CustomSnackbar from "./components/CustomSnackbar";
 
 const store = setupStore();
 
@@ -21,6 +22,7 @@ root.render(
     <Router basename="/">
       <Provider store={store}>
         <CookiesProvider>
+          <CustomSnackbar />
           <App />
         </CookiesProvider>
       </Provider>

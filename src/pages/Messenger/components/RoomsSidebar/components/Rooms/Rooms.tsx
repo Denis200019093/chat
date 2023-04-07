@@ -34,37 +34,36 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
     threshold: 0.1,
     skip: rooms?.last,
   });
-  console.log("Rooms");
 
-  useEffect(() => {
-    if (rooms && rooms.content.length) {
-      if (searchValue && rooms?.totalElements > 15) {
-        console.log("First");
-        setPageCount(0);
-        setAllRooms([]);
-        setFoundRooms((prevRooms) => [...prevRooms, ...rooms.content]);
-      }
+  // useEffect(() => {
+  //   if (rooms && rooms.content.length) {
+  //     if (searchValue && rooms?.totalElements > 15) {
+  //       console.log("First");
+  //       setPageCount(0);
+  //       setAllRooms([]);
+  //       setFoundRooms((prevRooms) => [...prevRooms, ...rooms.content]);
+  //     }
 
-      if (searchValue && rooms.totalElements <= 15) {
-        console.log("seco");
-        setPageCount(0);
-        setAllRooms([]);
-        setFoundRooms(rooms.content);
-      }
+  //     if (searchValue && rooms.totalElements <= 15) {
+  //       console.log("seco");
+  //       setPageCount(0);
+  //       setAllRooms([]);
+  //       setFoundRooms(rooms.content);
+  //     }
 
-      if (!searchValue && rooms.totalElements > 15) {
-        console.log("third");
-        setFoundRooms([]);
-        setAllRooms((prevRooms) => [...prevRooms, ...rooms.content]);
-      }
+  //     if (!searchValue && rooms.totalElements > 15) {
+  //       console.log("third");
+  //       setFoundRooms([]);
+  //       setAllRooms((prevRooms) => [...prevRooms, ...rooms.content]);
+  //     }
 
-      if (!searchValue && rooms.totalElements <= 15) {
-        console.log("Fifourthrst");
-        setFoundRooms([]);
-        setAllRooms(rooms.content);
-      }
-    }
-  }, [rooms, searchValue]);
+  //     if (!searchValue && rooms.totalElements <= 15) {
+  //       console.log("Fifourthrst");
+  //       setFoundRooms([]);
+  //       setAllRooms(rooms.content);
+  //     }
+  //   }
+  // }, [rooms, searchValue]);
 
   useEffect(() => {
     if (inView && rooms?.totalElements && rooms?.totalElements > 15)
@@ -78,7 +77,8 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
           <CircularProgress />
         </Grid>
       ) : (
-        (searchValue ? foundRooms : allRooms).map((room, index) => (
+        rooms?.content.map((room, index) => (
+          // (searchValue ? foundRooms : allRooms).map((room, index) => (
           <Room
             key={room.id}
             room={room}

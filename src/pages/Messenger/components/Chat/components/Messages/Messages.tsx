@@ -9,12 +9,7 @@ import Message from "./components/Message";
 import useScrollBottomChat from "src/hooks/useScrollBottomChat";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
-import {
-  clear,
-  clearPageCount,
-  getMessages,
-  nextPage,
-} from "src/redux/slices/messagesSlice";
+import { getMessages, nextPage } from "src/redux/slices/messagesSlice";
 
 const Messages: React.FC = () => {
   const { messages, pageCount } = useAppSelector((state) => state.messages);
@@ -24,16 +19,13 @@ const Messages: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const {
-    data: receivedMessages,
-    isFetching,
-    isLoading,
-  } = useGetMessagesQuery(
-    { roomId, pageCount },
-    {
-      refetchOnMountOrArgChange: true,
-      skip: !roomId,
-    }
-  );
+    data: receivedMessages, isLoading } = useGetMessagesQuery(
+      { roomId, pageCount },
+      {
+        refetchOnMountOrArgChange: true,
+        skip: !roomId,
+      }
+    );
 
   const { ref, inView } = useInView({
     threshold: 1,
@@ -41,22 +33,14 @@ const Messages: React.FC = () => {
   });
 
   useEffect(() => {
-    if (receivedMessages?.content && !isFetching) {
+    if (receivedMessages && !isLoading)
       dispatch(getMessages({ ...receivedMessages, currentRoomId: roomId }));
-    }
-
-    return () => {
-      if (messages.currentRoomId !== roomId) {
-        dispatch(clearPageCount());
-        dispatch(clear());
-      }
-    };
-  }, [dispatch, isFetching, messages.currentRoomId, receivedMessages, roomId]);
-
+  }, [dispatch, isLoading, receivedMessages, roomId]);
+  console.log(messages);
+  
   useEffect(() => {
-    if (inView) {
+    if (inView)
       dispatch(nextPage());
-    }
   }, [dispatch, inView]);
 
   return (
@@ -68,8 +52,8 @@ const Messages: React.FC = () => {
         height: "100%",
         backgroundImage:
           !receivedMessages?.content.length &&
-          !messages.content.length &&
-          !isLoading
+            !messages.content.length &&
+            !isLoading
             ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
             : null,
         backgroundRepeat: "no-repeat",

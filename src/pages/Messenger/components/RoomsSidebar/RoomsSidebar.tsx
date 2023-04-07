@@ -9,18 +9,15 @@ import useDebounce from "src/hooks/useDebounce";
 
 const RoomsSidebar: React.FC = () => {
   const {
-    handleSubmit,
     register,
-    getValues,
     watch,
     formState: { errors },
   } = useForm<{ name: string }>({
     mode: "onSubmit",
   });
 
-  const nameValue = watch("name");
-
-  const debouncedValue = useDebounce(nameValue);
+  const searchValue = watch("name");
+  const debouncedValue = useDebounce(searchValue);
 
   return (
     <Grid

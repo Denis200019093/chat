@@ -1,7 +1,9 @@
 import React from "react";
 import { Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
+
 import { useUploadAvatarMutation } from "src/redux/features/api";
+import { handleError } from "src/helpers/handleError";
 
 interface FormData {
   file: File[];
@@ -12,8 +14,6 @@ const Profile: React.FC = () => {
 
   const { register, handleSubmit } = useForm<FormData>();
 
-  const [error, setError] = React.useState<string>("");
-
   const onSubmit = async (data: FormData) => {
     try {
       const formData = new FormData();
@@ -22,8 +22,8 @@ const Profile: React.FC = () => {
       // console.log(formData);
       const url = await uploadAvatar(formData);
       // console.log(url);
-    } catch (err) {
-      setError("Error uploading avatar");
+    } catch (error) {
+      handleError(error)
     }
   };
 

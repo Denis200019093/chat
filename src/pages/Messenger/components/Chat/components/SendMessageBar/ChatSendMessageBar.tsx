@@ -5,15 +5,15 @@ import { useForm } from "react-hook-form";
 import NearMeIcon from "@mui/icons-material/NearMe";
 import CheckIcon from "@mui/icons-material/Check";
 
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { endEdit } from "src/redux/slices/messagesSlice";
+import { handleError } from "src/helpers/handleError";
+import { ISendMessageData } from "src/types/root";
+import { useParams } from "react-router-dom";
 import {
   useEditMessageMutation,
   useSendMessageMutation,
 } from "src/redux/features/messages.api";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { ISendMessageData } from "src/types/root";
-import { endEdit } from "src/redux/slices/messagesSlice";
-import CustomInput from "src/components/CustomInput";
-import { useParams } from "react-router-dom";
 
 const SendMessageBar: React.FC = () => {
   const [sendMessage] = useSendMessageMutation();
@@ -51,7 +51,9 @@ const SendMessageBar: React.FC = () => {
 
         reset();
       }
-    } catch (error) {}
+    } catch (error) {
+      handleError(error)
+    }
   };
 
   return (

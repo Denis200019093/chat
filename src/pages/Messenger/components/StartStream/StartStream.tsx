@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Stomp from "stompjs";
 import { Button, Grid } from "@mui/material";
+import { useParams } from "react-router-dom";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { setStreamId, unsetReadyStream } from "src/redux/slices/streamSlice";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { unsetReadyStream } from "src/redux/slices/streamSlice";
 import { showRoomProfile } from "src/redux/slices/modesSlice";
-import { useAppDispatch } from "src/hooks/useRedux";
-import { useParams } from "react-router-dom";
+import { handleError } from "src/helpers/handleError";
 import {
-  useLazyEndStreamQuery,
-  useLazyStartStreamQuery,
+  useStartStreamMutation,
+  useStopStreamingMutation,
 } from "src/redux/features/stream.api";
 
 interface IProps {
@@ -23,10 +24,12 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [username: string]: RTCPeerConnection;
   }>({});
 
-  const [endStream] = useLazyEndStreamQuery();
-  const [startStream] = useLazyStartStreamQuery();
+  const [startStream] = useStartStreamMutation();
+  const [stopStreaming] = useStopStreamingMutation();
 
   const dispatch = useAppDispatch();
+
+  const { me } = useAppSelector((state) => state.users)
 
   const { id: roomId } = useParams();
 
@@ -34,21 +37,20 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
   const handleStartStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
+      const displayMedia = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
 
       await startStream(roomId);
 
-      if (currentStream.current && stream) {
-        currentStream.current.srcObject = stream;
-        setStream(stream);
+      if (currentStream.current && displayMedia && me) {
+        currentStream.current.srcObject = displayMedia;
+        setStream(displayMedia);
         setStreaming(true);
-        dispatch(setStreamId(stream.id));
       }
     } catch (error) {
-      console.log(error);
+      handleError(error)
     }
   };
 
@@ -59,21 +61,21 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           const tracks = stream.getTracks();
           tracks.forEach((track) => track.stop());
 
-          await endStream();
+          await stopStreaming();
 
           setStream(null);
           setStreaming(false);
           dispatch(showRoomProfile());
         }
       } catch (error) {
-        console.log(error);
+        handleError(error)
       }
     };
 
     return () => {
       if (stream) handleStopStream();
     };
-  }, [dispatch, endStream, stream]);
+  }, [dispatch, stopStreaming, stream]);
 
   const createConnectionStream = useCallback(
     async (username: string) => {
@@ -130,7 +132,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           peerConnection.addTrack(track, stream);
         });
       } catch (error) {
-        console.log(error);
+        handleError(error);
       }
     },
     [clientSocket, roomId, stream]
@@ -171,7 +173,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           }
         }
       } catch (error) {
-        console.log(error);
+        handleError(error);
       }
     },
     [createConnectionStream, peerConnections]
@@ -201,7 +203,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           stream ? dispatch(unsetReadyStream()) : handleStartStream()
         }
       >
-        {stream ? "Close/Stop" : "Start"} stream
+        {stream ? "Stop" : "Start"} stream
       </Button>
     </Grid>
   );

@@ -17,8 +17,10 @@ import {
 import {
   deleteActiveUser,
   setActiveUser,
-  setUserStreamingFalse,
-  setUserStreamingTrue,
+  setStreamStatusOfUser,
+  deleteStreamStatusOfUser,
+  setViewer,
+  deleteViewer
 } from "src/redux/slices/usersSlice";
 
 interface MessageHeaders {
@@ -60,7 +62,7 @@ const Chat: React.FC = () => {
         }
         case "subscribe-event": {
           dispatch(
-            setActiveUser({ username: message.body, userStreaming: false })
+            setActiveUser(JSON.parse(message.body))
           );
           break;
         }
@@ -69,11 +71,19 @@ const Chat: React.FC = () => {
           break;
         }
         case "stream-started-event": {
-          dispatch(setUserStreamingTrue(message.body));
+          dispatch(setStreamStatusOfUser({ id: Date.now(), streamer: message.body, viewers: [] }))
           break;
         }
         case "stream-ended-event": {
-          dispatch(setUserStreamingFalse(message.body));
+          dispatch(deleteStreamStatusOfUser(message.body));
+          break;
+        }
+        case "stream-viewer-joined": {
+          dispatch(setViewer(JSON.parse(message.body)))
+          break;
+        }
+        case "stream-viewer-left": {
+          dispatch(deleteViewer(JSON.parse(message.body)));
           break;
         }
       }

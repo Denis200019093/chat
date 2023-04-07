@@ -7,7 +7,6 @@ import {
   DialogContent,
   Grid,
   Slide,
-  styled,
   Typography,
 } from "@mui/material";
 
@@ -31,6 +30,8 @@ const Transition = React.forwardRef(function Transition(
 const CreateRoomForm: React.FC = () => {
   const [createRoom, { isLoading }] = useCreateRoomMutation();
 
+  const dispatch = useAppDispatch();
+
   const {
     handleSubmit,
     register,
@@ -38,11 +39,16 @@ const CreateRoomForm: React.FC = () => {
     formState: { errors },
   } = useForm<CreateRoomData>({
     mode: "onChange",
+    defaultValues: {
+      name: "",
+      description: "",
+    },
   });
 
   const submitCreateRoom = async (roomValues: CreateRoomData) => {
     try {
       await createRoom(roomValues);
+      dispatch(hideCreateRoomModal())
       reset();
     } catch (error) {
       handleError(error);
@@ -101,7 +107,7 @@ const CreateRoomGrid = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <Grid item xs={5} sx={{ bgcolor: "rgb(35,35,35)", p: 3 }}>
+      <Grid item xs={4} sx={{ bgcolor: "rgb(35,35,35)", p: 3 }}>
         <CreateRoomForm />
       </Grid>
     </Grid>
@@ -122,9 +128,10 @@ const CreateRoomDialog = () => {
       TransitionComponent={Transition}
       keepMounted
       onClose={hideDialog}
+
     >
       <Grid item sx={{ bgcolor: "rgb(35,35,35)", p: 3 }}>
-        <DialogContent>
+        <DialogContent sx={{ width: "350px" }}>
           <Grid container justifyContent="center">
             <CreateRoomForm />
           </Grid>

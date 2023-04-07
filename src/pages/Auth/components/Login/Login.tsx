@@ -1,46 +1,27 @@
-import React, { useCallback, useEffect } from "react";
-import { Button, Grid, Typography } from "@mui/material";
+import React, { useCallback } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
-import CustomInput from "src/components/CustomInput";
+import AuthForm from "../AuthForm";
 import { useSignInMutation } from "src/redux/features/auth.api";
 import { handleError } from "src/helpers/handleError";
 import { getMe } from "src/redux/slices/usersSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
-import { useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
 import { AuthData } from "src/types/root";
-import { useForm } from "react-hook-form";
 
 interface IProps {
   signingIn: boolean;
-  username: string;
-  password: string;
+  dataAfterRegister: AuthData;
 }
 
-const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
+const Login: React.FC<IProps> = ({ signingIn, dataAfterRegister }) => {
   const [signIn, { isLoading }] = useSignInMutation();
 
   const [cookies, setCookie] = useCookies(["token"]);
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    formState: { errors },
-  } = useForm<AuthData>({
-    mode: "onChange",
-  });
-
-  useEffect(() => {
-    if (username && password) {
-      setValue("username", username);
-      setValue("password", password);
-    }
-  }, [password, setValue, username]);
 
   const submitLogin = useCallback(
     async (values: AuthData) => {
@@ -49,7 +30,7 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
 
         if (token) {
           navigate("/");
-          dispatch(getMe({ username: values.username, userStreaming: false }));
+          dispatch(getMe({ username: values.username }));
           setCookie("token", token, {
             path: "/",
             expires: new Date(Date.now() + 10000000),
@@ -64,35 +45,11 @@ const Login: React.FC<IProps> = ({ signingIn, username, password }) => {
 
   return (
     <SignInContainer signingIn={signingIn}>
-      <Form onSubmit={handleSubmit(submitLogin)}>
-        <Grid container item spacing={2} justifyContent="center">
-          <Grid item>
-            <Typography variant="h1">Login</Typography>
-          </Grid>
-          <Grid container item>
-            <CustomInput
-              {...register("username", { required: true })}
-              defaultValue={""}
-              name="username"
-              placeholder="Username"
-            />
-          </Grid>
-          <Grid container item>
-            <CustomInput
-              {...register("password", { required: true })}
-              type="password"
-              name="password"
-              placeholder="Password"
-              defaultValue={""}
-            />
-          </Grid>
-          <Grid item>
-            <Button disabled={isLoading} variant="contained" type="submit">
-              Sign In
-            </Button>
-          </Grid>
-        </Grid>
-      </Form>
+      <AuthForm
+        submitAuthFunc={submitLogin}
+        isLoading={isLoading}
+        dataAfterRegister={dataAfterRegister}
+      />
     </SignInContainer>
   );
 };
@@ -111,15 +68,4 @@ const SignInContainer = styled.div`
     props.signingIn
       ? `transform: translateX(100%);`
       : `transform: translateX(0); opacity: 0;`}
-`;
-
-const Form = styled.form`
-  background-color: rgba(35, 35, 35, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 50px;
-  height: 100%;
-  text-align: center;
 `;

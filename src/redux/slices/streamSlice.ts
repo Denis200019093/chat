@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IState {
-  streamId: string | null;
+  streamerUsername: string | null;
   isReadyToWatch: boolean;
   isReadyToStream: boolean;
 }
 
 const initialState: IState = {
-  streamId: null,
+  streamerUsername: null,
   isReadyToWatch: false,
   isReadyToStream: false,
 };
@@ -16,11 +16,8 @@ const streamSlice = createSlice({
   name: "stream",
   initialState,
   reducers: {
-    setStreamId(state, action: PayloadAction<string>) {
-      state.streamId = action.payload;
-    },
-    unsetStreamId(state) {
-      state.streamId = null;
+    setStreamerUsername(state, action: PayloadAction<string>) {
+      state.streamerUsername = action.payload;
     },
     setReadyWatch(state) {
       state.isReadyToWatch = true;
@@ -41,10 +38,9 @@ const streamSlice = createSlice({
 
 export const {
   setReadyWatch,
+  setStreamerUsername,
   unsetReadyWatch,
   setReadyStream,
   unsetReadyStream,
-  setStreamId,
-  unsetStreamId,
 } = streamSlice.actions;
 export const streamReducer = streamSlice.reducer;

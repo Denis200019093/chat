@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { Button, Typography, Grid } from "@mui/material";
 
-import CustomInput from "src/components/CustomInput";
+import AuthForm from "../AuthForm";
 import { useSignUpMutation } from "src/redux/features/auth.api";
+import { openSnackbar } from "src/redux/slices/modesSlice";
 import { handleError } from "src/helpers/handleError";
-import { useForm } from "react-hook-form";
+import { useAppDispatch } from "src/hooks/useRedux";
 import { AuthData } from "src/types/root";
 
 interface IProps {
@@ -21,21 +21,9 @@ const Register: React.FC<IProps> = ({
   setUsername,
   setPassword,
 }) => {
-  const [signUp, { isLoading, isError, error }] = useSignUpMutation();
-  console.log(isError, error);
+  const [signUp, { isLoading }] = useSignUpMutation();
 
-  const {
-    handleSubmit,
-    register,
-    reset,
-    formState: { errors },
-  } = useForm<AuthData>({
-    mode: "onChange",
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
+  const dispatch = useAppDispatch();
 
   const submitRegister = useCallback(
     async (values: AuthData) => {
@@ -45,51 +33,20 @@ const Register: React.FC<IProps> = ({
         setUsername(values.username);
         setPassword(values.password);
         toggleSignIn(true);
-        reset({
-          username: "",
-          password: "",
-        });
+        dispatch(openSnackbar({
+          text: "Registration is successful. Click 'Sign in' to submit",
+          severity: "info"
+        }))
       } catch (error) {
         handleError(error);
       }
     },
-    [reset, setPassword, setUsername, signUp, toggleSignIn]
+    [dispatch, setPassword, setUsername, signUp, toggleSignIn]
   );
 
   return (
     <SignUpContainer signingIn={signingIn}>
-      <Form onSubmit={handleSubmit(submitRegister)}>
-        <Grid container item spacing={2} justifyContent="center">
-          <Grid item>
-            <Typography variant="h1">Register</Typography>
-          </Grid>
-          <Grid container item>
-            <CustomInput
-              {...register("username", {
-                required: true,
-                minLength: 5,
-                maxLength: 15,
-              })}
-              helperText={errors.username && "Min length 5, max length 15"}
-              name="username"
-              placeholder="Username"
-            />
-          </Grid>
-          <Grid container item>
-            <CustomInput
-              {...register("password")}
-              type="password"
-              name="password"
-              placeholder="Password"
-            />
-          </Grid>
-          <Grid item>
-            <Button disabled={isLoading} variant="contained" type="submit">
-              Sign Up
-            </Button>
-          </Grid>
-        </Grid>
-      </Form>
+      <AuthForm submitAuthFunc={submitRegister} isLoading={isLoading} isLogin={false} />
     </SignUpContainer>
   );
 };
@@ -117,15 +74,4 @@ const SignUpContainer = styled.div`
       opacity: 0;
       z-index: 0;
     `}
-`;
-
-const Form = styled.form`
-  background-color: rgba(35, 35, 35, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 50px;
-  height: 100%;
-  text-align: center;
 `;

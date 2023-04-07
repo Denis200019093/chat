@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -13,7 +13,7 @@ const Auth: React.FC = () => {
 
   return (
     <Container>
-      <Login signingIn={signIn} username={username} password={password} />
+      <Login signingIn={signIn} dataAfterRegister={{ username, password }} />
       <Register
         signingIn={signIn}
         toggleSignIn={toggleSignIn}
@@ -48,7 +48,7 @@ const Auth: React.FC = () => {
 export default Auth;
 
 export const Container = styled.div`
-  background-color: #fff;
+  background-color: rgba(35, 35, 35, 0.8);
   border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;

@@ -36,7 +36,6 @@ const messagesSlice = createSlice({
   reducers: {
     getMessages(state, action: PayloadAction<MessagesData>) {
       state.messages = {
-        // content: [...state.messages.content, ...action.payload.content],
         content: [...action.payload.content, ...state.messages.content],
         totalPages: action.payload.totalPages,
         currentRoomId: action.payload.currentRoomId,
