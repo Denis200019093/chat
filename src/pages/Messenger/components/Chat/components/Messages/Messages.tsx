@@ -12,7 +12,7 @@ import { useGetMessagesQuery } from "src/redux/features/messages.api";
 import { getMessages, nextPage } from "src/redux/slices/messagesSlice";
 
 const Messages: React.FC = () => {
-  const { messages, pageCount } = useAppSelector((state) => state.messages);
+  const { messages, offset } = useAppSelector((state) => state.messages);
   const { chatScrollRef } = useScrollBottomChat(messages);
   const { id: roomId } = useParams();
 
@@ -20,7 +20,7 @@ const Messages: React.FC = () => {
 
   const {
     data: receivedMessages, isLoading } = useGetMessagesQuery(
-      { roomId, pageCount },
+      { roomId, offset },
       {
         refetchOnMountOrArgChange: true,
         skip: !roomId,

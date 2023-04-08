@@ -5,10 +5,10 @@ export const messagesApi = api.injectEndpoints({
   endpoints: (build) => ({
     getMessages: build.query<
       MessagesData,
-      { roomId: string | undefined; pageCount: number }
+      { roomId: string | undefined; offset: number }
     >({
-      query: ({ roomId, pageCount }) => ({
-        url: `/chatrooms/${roomId}/messages?page=${pageCount}`,
+      query: ({ roomId, offset }) => ({
+        url: `/chatrooms/${roomId}/messages?offset=${offset}`,
       }),
     }),
     sendMessage: build.mutation<

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Action } from "@remix-run/router";
 
 import { IMessage, MessagesData } from "../../types/root";
 
@@ -8,7 +9,7 @@ interface IState {
     totalPages: number | null;
     currentRoomId: string | null | undefined;
   };
-  pageCount: number;
+  offset: number;
   editStatus: {
     isEditing: boolean;
     messageId: number | null;
@@ -22,7 +23,7 @@ const initialState: IState = {
     totalPages: null,
     currentRoomId: null,
   },
-  pageCount: 0,
+  offset: 0,
   editStatus: {
     isEditing: false,
     messageId: null,
@@ -36,16 +37,17 @@ const messagesSlice = createSlice({
   reducers: {
     getMessages(state, action: PayloadAction<MessagesData>) {
       state.messages = {
-        content: [...action.payload.content, ...state.messages.content],
+        content: [...state.messages.content, ...action.payload.content],
+        // content: [...action.payload.content, ...state.messages.content],
         totalPages: action.payload.totalPages,
         currentRoomId: action.payload.currentRoomId,
       };
     },
     nextPage(state) {
-      state.pageCount = state.pageCount + 1;
+      state.offset = state.messages.content.length;
     },
     clearPageCount(state) {
-      state.pageCount = 0;
+      state.offset = 0;
     },
     addMessage(state, action: PayloadAction<IMessage>) {
       state.messages.content = [...state.messages.content, action.payload];
