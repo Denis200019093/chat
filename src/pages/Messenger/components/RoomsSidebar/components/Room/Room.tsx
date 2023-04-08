@@ -47,14 +47,6 @@ const Room = forwardRef<HTMLDivElement, IProps>(
       navigate(path);
     };
 
-    const bgColor = () => {
-      if (roomId && +roomId === +room.id) {
-        return "rgba(255,255,255,0.15)";
-      } else {
-        return "";
-      }
-    };
-
     return (
       <Grid
         container
@@ -66,9 +58,9 @@ const Room = forwardRef<HTMLDivElement, IProps>(
           p: "16px 8px",
           transition: "0.3s",
           cursor: "pointer",
-          bgcolor: bgColor,
+          bgcolor: roomId && +roomId === +room.id ? "rgba(50,50,50,0.8)" : "",
           "&:hover": {
-            bgcolor: "rgba(255,255,255,0.15)",
+            bgcolor: "rgba(60,60,60,1)",
           },
         }}
       >
@@ -81,7 +73,6 @@ const Room = forwardRef<HTMLDivElement, IProps>(
         <Grid item>
           <Grid container item>
             <MultiLineText text={room.name} variant="h6" />
-            {/* <Typography>{index}</Typography> */}
           </Grid>
           <Grid container item>
             <MultiLineText

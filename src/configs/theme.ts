@@ -23,15 +23,15 @@ export let theme = createTheme({
             },
           },
         },
-        // {
-        //   props: { variant: "live", disabled: true },
-        //   style: {
-        //     // backgroundColor: "red",
-        //     pointerEvents: "all",
-        //     color: "lightgray",
-        //     cursor: "not-allowed",
-        //   },
-        // },
+        {
+          props: { variant: "contained" },
+          style: {
+            backgroundColor: "rgb(25,25,25)",
+            "&:hover": {
+              backgroundColor: "rgb(30,30,30)",
+            },
+          },
+        },
       ],
     },
   },

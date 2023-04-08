@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import {
   Grid,
   Typography,
-  Button,
   Drawer,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 
+import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from "@mui/icons-material/Description";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
@@ -60,47 +61,51 @@ const RoomProfile: React.FC = () => {
         item
         sx={{ pl: 2, pr: 2, bgcolor: "rgb(35,35,35)", height: "100%" }}
       >
-        <Grid item>
-          <Grid container item alignItems="center">
+        <Grid container item sx={{ height: "65px" }}>
+          <Grid container item alignItems="center" justifyContent="space-between">
             <MultiLineText
               text={roomInfo?.name || ""}
               quantityLines={2}
               variant="h2"
             />
             {isReadyToStream || isReadyToWatch ? (
-              <Button onClick={() => dispatch(hideRoomProfile())}>X</Button>
+              <IconButton onClick={() => dispatch(hideRoomProfile())} size="small">
+                <CloseIcon sx={{ color: "#fff" }}/>
+              </IconButton>
             ) : null}
           </Grid>
         </Grid>
-        <Grid item>
-          <Grid container spacing={1}>
-            <Grid container item alignItems="center">
-              <DescriptionIcon
-                sx={{ fontSize: "16px", mr: 1, color: "#fff" }}
-              />
-              <Typography>Description</Typography>
-            </Grid>
-            <Grid container item>
-              <Typography variant="body1">{roomInfo?.description}</Typography>
+        <Grid container spacing={3}>
+          <Grid item>
+            <Grid container spacing={1}>
+              <Grid container item alignItems="center">
+                <DescriptionIcon
+                  sx={{ fontSize: "16px", mr: 1, color: "#fff" }}
+                />
+                <Typography>Description</Typography>
+              </Grid>
+              <Grid container item>
+                <Typography variant="body1">{roomInfo?.description}</Typography>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item>
-          <Grid container spacing={2}>
-            <Grid container item alignItems="center">
-              <PeopleAltOutlinedIcon
-                sx={{ fontSize: "16px", mr: 1, color: "#fff" }}
-              />
-              <Typography>Members ({activeUsers.length})</Typography>
-            </Grid>
-            <Grid container item spacing={1}>
-              {isFetching ? (
-                <CircularProgress />
-              ) : (
-                activeUsers.map((user) => (
-                  <ActiveUser key={user.username} user={user} />
-                ))
-              )}
+          <Grid item>
+            <Grid container spacing={2}>
+              <Grid container item alignItems="center">
+                <PeopleAltOutlinedIcon
+                  sx={{ fontSize: "16px", mr: 1, color: "#fff" }}
+                />
+                <Typography>Members ({activeUsers.length})</Typography>
+              </Grid>
+              <Grid container item spacing={1}>
+                {isFetching ? (
+                  <CircularProgress />
+                ) : (
+                  activeUsers.map((user) => (
+                    <ActiveUser key={user.username} user={user} />
+                  ))
+                )}
+              </Grid>
             </Grid>
           </Grid>
         </Grid>

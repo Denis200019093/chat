@@ -30,7 +30,7 @@ export default CustomInput;
 
 const Input = styled(TextField)({
   borderRadius: "6px",
-  backgroundColor: "rgba(255,255,255,0.1)",
+  backgroundColor: "rgba(50,50,50,0.5)",
   input: { color: "#fff" },
   fieldset: {
     display: "none",

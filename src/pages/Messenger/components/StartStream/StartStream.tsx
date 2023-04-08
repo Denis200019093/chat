@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Stomp from "stompjs";
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, IconButton } from "@mui/material";
 import { useParams } from "react-router-dom";
+
+import CloseIcon from '@mui/icons-material/Close';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
@@ -65,7 +69,6 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
           setStream(null);
           setStreaming(false);
-          dispatch(showRoomProfile());
         }
       } catch (error) {
         handleError(error)
@@ -74,6 +77,8 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
     return () => {
       if (stream) handleStopStream();
+
+      dispatch(showRoomProfile());
     };
   }, [dispatch, stopStreaming, stream]);
 
@@ -188,23 +193,34 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   });
 
   return (
-    <Grid container item sx={{ mt: "65px" }} justifyContent="center">
+    <Grid container item justifyContent="center">
+      <Grid container item sx={{ height: "65px" }} justifyContent="end">
+        <IconButton
+          size="large"
+          onClick={() => dispatch(unsetReadyStream())}
+        >
+          <CloseIcon sx={{ fontSize: "35px", color: "gray" }} />
+        </IconButton>
+      </Grid>
       <video
         controls
         style={{ height: "100%", width: "100%" }}
         autoPlay
         ref={currentStream}
       />
-      <Button
+      <IconButton
         size="large"
-        sx={{ mt: 5 }}
-        variant="contained"
+        sx={{ mt: 3 }}
         onClick={() =>
           stream ? dispatch(unsetReadyStream()) : handleStartStream()
         }
       >
-        {stream ? "Stop" : "Start"} stream
-      </Button>
+        {stream ?
+          <CancelIcon sx={{ fontSize: "50px", color: "red" }} /> :
+          <PlayCircleOutlineIcon sx={{ fontSize: "50px", color: "lightgray" }}
+          />
+        }
+      </IconButton>
     </Grid>
   );
 };

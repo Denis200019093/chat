@@ -14,7 +14,7 @@ const SidebarHeader: React.FC = () => {
     <Grid
       container
       item
-      sx={{ p: "14px 8px" }}
+      sx={{ p: "14px 8px", height: "65px" }}
       justifyContent="space-between"
       alignItems="center"
     >
