@@ -14,7 +14,7 @@ const WatchStream = lazy(() => import("./components/WatchStream"));
 
 const Messenger: React.FC = () => {
   const [clientSocket, setClientSocket] = useState<Stomp.Client | null>(null);
-
+  
   const [cookies] = useCookies(["token"]);
   const { isReadyToWatch, isReadyToStream } = useAppSelector(
     (state) => state.stream
