@@ -1,14 +1,17 @@
 import React, { memo, forwardRef } from "react";
 import { Avatar, Grid, Typography } from "@mui/material";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import MultiLineText from "src/components/MultiLineText";
 import { IRoom } from "src/types/root";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { showRoomProfile } from "src/redux/slices/modesSlice";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { unsetReadyStream, unsetReadyWatch } from "src/redux/slices/streamSlice";
 import { useStopWatchingMutation } from "src/redux/features/stream.api";
 import { clear, clearPageCount } from "src/redux/slices/messagesSlice";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { showRoomProfile } from "src/redux/slices/modesSlice";
+import {
+  unsetReadyStream,
+  unsetReadyWatch,
+} from "src/redux/slices/streamSlice";
 
 interface IProps {
   room: IRoom;
@@ -34,10 +37,6 @@ const Room = forwardRef<HTMLDivElement, IProps>(
       if (pathname === path) {
         return;
       }
-
-      // if (streamerUsername) {
-      //   await stopWatching(streamerUsername);
-      // }
 
       dispatch(clear());
       dispatch(clearPageCount());

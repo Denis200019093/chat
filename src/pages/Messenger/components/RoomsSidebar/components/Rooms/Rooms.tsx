@@ -6,6 +6,7 @@ import Room from "../Room";
 import { IRoom } from "src/types/root";
 import { useGetRoomsQuery } from "src/redux/features/room.api";
 import { useAppDispatch } from "src/hooks/useRedux";
+import { useParams } from "react-router-dom";
 
 interface IProps {
   searchValue: string;
@@ -13,7 +14,7 @@ interface IProps {
 
 const Rooms: React.FC<IProps> = ({ searchValue }) => {
   const [allRooms, setAllRooms] = useState<IRoom[]>([]);
-  const [foundRooms, setFoundRooms] = useState<IRoom[]>([]);
+  const [block, setBlock] = useState<boolean>(false);
   const [pageCount, setPageCount] = useState<number>(0);
 
   const dispatch = useAppDispatch();
@@ -35,33 +36,28 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
     skip: rooms?.last,
   });
 
+  useEffect(() => {
+    if (searchValue) {
+      setPageCount(0);
+      setAllRooms([]);
+      setBlock(true);
+    }
+  }, [searchValue]);
+
+  useEffect(() => {
+    if (rooms && rooms.content.length) {
+      setAllRooms((prevRooms) => [...prevRooms, ...rooms.content]);
+    }
+  }, [rooms, searchValue]);
+
   // useEffect(() => {
   //   if (rooms && rooms.content.length) {
-  //     if (searchValue && rooms?.totalElements > 15) {
-  //       console.log("First");
-  //       setPageCount(0);
-  //       setAllRooms([]);
-  //       setFoundRooms((prevRooms) => [...prevRooms, ...rooms.content]);
-  //     }
-
-  //     if (searchValue && rooms.totalElements <= 15) {
-  //       console.log("seco");
-  //       setPageCount(0);
-  //       setAllRooms([]);
-  //       setFoundRooms(rooms.content);
-  //     }
-
-  //     if (!searchValue && rooms.totalElements > 15) {
-  //       console.log("third");
-  //       setFoundRooms([]);
-  //       setAllRooms((prevRooms) => [...prevRooms, ...rooms.content]);
-  //     }
-
-  //     if (!searchValue && rooms.totalElements <= 15) {
-  //       console.log("Fifourthrst");
-  //       setFoundRooms([]);
-  //       setAllRooms(rooms.content);
-  //     }
+  //     setAllRooms((prevRooms) => {
+  //       const newRooms = rooms.content.filter((room) => {
+  //         return !prevRooms.some((prevRoom) => prevRoom.id === room.id);
+  //       });
+  //       return [...prevRooms, ...newRooms];
+  //     });
   //   }
   // }, [rooms, searchValue]);
 
@@ -69,7 +65,7 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
     if (inView && rooms?.totalElements && rooms?.totalElements > 15)
       setPageCount((prevCount) => prevCount + 1);
   }, [inView, rooms?.totalElements]);
-
+  const { id: roomId } = useParams();
   return (
     <Grid container>
       {isLoading ? (
@@ -77,8 +73,7 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
           <CircularProgress />
         </Grid>
       ) : (
-        rooms?.content.map((room, index) => (
-          // (searchValue ? foundRooms : allRooms).map((room, index) => (
+        allRooms.map((room, index) => (
           <Room
             key={room.id}
             room={room}
@@ -88,7 +83,7 @@ const Rooms: React.FC<IProps> = ({ searchValue }) => {
           />
         ))
       )}
-      {searchValue && !foundRooms.length && (
+      {searchValue && !allRooms.length && (
         <Typography>Room not found</Typography>
       )}
     </Grid>

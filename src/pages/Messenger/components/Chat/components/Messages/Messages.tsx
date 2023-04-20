@@ -36,7 +36,6 @@ const Messages: React.FC = () => {
     if (receivedMessages && !isLoading)
       dispatch(getMessages({ ...receivedMessages, currentRoomId: roomId }));
   }, [dispatch, isLoading, receivedMessages, roomId]);
-  console.log(messages);
   
   useEffect(() => {
     if (inView)
