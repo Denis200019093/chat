@@ -8,8 +8,8 @@ export default defineConfig({
       src: "/src",
     },
   },
-  server: {
-    port: 3000,
-    host: true,
-  },
+  // server: {
+  //   port: 3000,
+  //   host: true,
+  // },
 });
