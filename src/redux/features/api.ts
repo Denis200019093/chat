@@ -4,7 +4,7 @@ export const api = createApi({
   reducerPath: "api",
   tagTypes: ["Room", "Message"],
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
+    baseUrl: "http://localhost:8080",
     prepareHeaders: (headers, { endpoint }) => {
       const token = document.cookie.match("token")?.input?.slice(6);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import { StompSubscription } from "@stomp/stompjs";
 import Stomp from "stompjs";
 
@@ -27,47 +27,46 @@ const useStompSubscription = ({
     switch (subscribeOn) {
       case "chat": {
         return `/chatrooms/${myRoomId}`;
-        break;
       }
       case "my-stream": {
         return `/chatrooms/${myRoomId}/streamer`;
-        break;
       }
       case "live-stream": {
         return `/chatrooms/${myRoomId}/viewer/${username}`;
-        break;
       }
     }
   }, [myRoomId, subscribeOn, username]);
 
-  useEffect(() => {
-    if (clientSocket?.connected && subscribeOn && readyToSubscribe) {
+  const subscribe = useCallback(() => {
+    if (clientSocket?.connected) {
       subscriptionRef.current = clientSocket.subscribe(
         destination,
         handleSocketMessage,
         { id: destination }
       );
     }
+  }, [clientSocket, destination, handleSocketMessage]);
 
-    const handleBeforeUnload = () => subscriptionRef.current?.unsubscribe();
+  const unsubscribe = useCallback(() => {
+    const subscription = subscriptionRef.current;
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    if (subscription) {
+      subscription.unsubscribe();
+      subscriptionRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (clientSocket?.connected && readyToSubscribe) {
+      subscribe();
+    }
 
     return () => {
-      const subscription = subscriptionRef.current;
-
-      if (subscription) {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-        subscription.unsubscribe();
-      }
+      unsubscribe();
     };
-  }, [
-    clientSocket,
-    destination,
-    handleSocketMessage,
-    readyToSubscribe,
-    subscribeOn,
-  ]);
+  }, [clientSocket?.connected, readyToSubscribe, subscribe, unsubscribe]);
+
+  return { subscribe, unsubscribe };
 };
 
 export default useStompSubscription;

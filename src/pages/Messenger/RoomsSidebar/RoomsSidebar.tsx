@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Grid, styled } from "@mui/material";
 
-import Rooms from "./components/Rooms";
-import SidebarHeader from "./components/SidebarHeader";
+import Rooms from "./Rooms";
+import SidebarHeader from "./SidebarHeader";
 import CustomInput from "src/components/CustomInput";
 import useDebounce from "src/hooks/useDebounce";
 

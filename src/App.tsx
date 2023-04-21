@@ -10,8 +10,45 @@ import NotFound from "./pages/NotFound/NotFound";
 import { useAppDispatch } from "./hooks/useRedux";
 import { getMe } from "./redux/slices/usersSlice";
 import { useGetMeQuery } from "./redux/features/auth.api";
+import WatchStream from "./pages/Messenger/WatchStream";
 
-const Chat = lazy(() => import("./pages/Messenger/components/Chat"));
+const Chat = lazy(() => import("./pages/Messenger/Chat"));
+
+const PublicRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Navigate to="/auth" />}>
+      <Route
+        path="chatroom/:id"
+        element={
+          <React.Suspense fallback={<CircularProgress />}>
+            <Chat />
+          </React.Suspense>
+        }
+      />
+    </Route>
+    <Route path="/auth" element={<Auth />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
+const PrivateRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Messenger />}>
+      <Route
+        path="chatroom/:id"
+        element={
+          <React.Suspense fallback={<CircularProgress />}>
+            <Chat />
+          </React.Suspense>
+        }
+      >
+        <Route path="watch/:streamerName" element={<WatchStream />} />
+      </Route>
+    </Route>
+    <Route path="/profile" element={<Profile />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
 
 const App: React.FC = () => {
   const { data: me } = useGetMeQuery();
@@ -21,7 +58,9 @@ const App: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (me?.username) dispatch(getMe(me));
+    if (me?.username.length) {
+      dispatch(getMe(me));
+    }
   }, [dispatch, me]);
 
   if (!cookies.token) {
@@ -33,21 +72,7 @@ const App: React.FC = () => {
         justifyContent="center"
         alignItems="center"
       >
-        <Routes>
-          <Route path="/" element={<Navigate to="/auth" />}>
-            <Route
-              path="chatroom/:id"
-              element={
-                <React.Suspense fallback={<CircularProgress />}>
-                  <Chat />
-                </React.Suspense>
-              }
-            />
-          </Route>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/profile" element={<Navigate to="/auth" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <PublicRoutes />
       </Grid>
     );
   }
@@ -60,21 +85,7 @@ const App: React.FC = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <Routes>
-        <Route path="/" element={<Messenger />}>
-          <Route
-            path="chatroom/:id"
-            element={
-              <React.Suspense fallback={<CircularProgress />}>
-                <Chat />
-              </React.Suspense>
-            }
-          />
-        </Route>
-        <Route path="/auth" element={<Navigate to="/" />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <PrivateRoutes />
     </Grid>
   );
 };

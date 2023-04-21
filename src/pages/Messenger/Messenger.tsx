@@ -3,18 +3,18 @@ import Stomp from "stompjs";
 import { Grid } from "@mui/material";
 import { useCookies } from "react-cookie";
 
-import RoomsSidebar from "./components/RoomsSidebar";
-import CreateRoom from "./components/Chat/components/CreateRoom";
+import RoomsSidebar from "./RoomsSidebar";
+import CreateRoom from "./Chat/CreateRoom";
 import { Outlet } from "react-router-dom";
 import { useAppSelector } from "src/hooks/useRedux";
 import { createStompClient } from "src/configs/stomp";
 
-const StartStream = lazy(() => import("./components/StartStream"));
-const WatchStream = lazy(() => import("./components/WatchStream"));
+const StartStream = lazy(() => import("./StartStream"));
+const WatchStream = lazy(() => import("./WatchStream"));
 
 const Messenger: React.FC = () => {
   const [clientSocket, setClientSocket] = useState<Stomp.Client | null>(null);
-  
+
   const [cookies] = useCookies(["token"]);
   const { isReadyToWatch, isReadyToStream } = useAppSelector(
     (state) => state.stream
@@ -59,11 +59,6 @@ const Messenger: React.FC = () => {
         {isReadyToStream && (
           <Suspense fallback={<div>Loading...</div>}>
             <StartStream clientSocket={clientSocket} />
-          </Suspense>
-        )}
-        {isReadyToWatch && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <WatchStream clientSocket={clientSocket} />
           </Suspense>
         )}
       </Grid>

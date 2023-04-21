@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Stomp from "stompjs";
-import { Button, Grid, IconButton } from "@mui/material";
+import { Grid, IconButton } from "@mui/material";
 import { useParams } from "react-router-dom";
 
-import CloseIcon from '@mui/icons-material/Close';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CloseIcon from "@mui/icons-material/Close";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
@@ -24,16 +24,17 @@ interface IProps {
 const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isStreaming, setStreaming] = useState<boolean>(false);
-  const [peerConnections, setPeerConnections] = useState<{
-    [username: string]: RTCPeerConnection;
-  }>({});
+
+  const peerConnectionsRef = useRef<{ [username: string]: RTCPeerConnection }>(
+    {}
+  );
 
   const [startStream] = useStartStreamMutation();
   const [stopStreaming] = useStopStreamingMutation();
 
   const dispatch = useAppDispatch();
 
-  const { me } = useAppSelector((state) => state.users)
+  const { me } = useAppSelector((state) => state.users);
 
   const { id: roomId } = useParams();
 
@@ -54,7 +55,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
         setStreaming(true);
       }
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -69,16 +70,16 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
           setStream(null);
           setStreaming(false);
+          dispatch(showRoomProfile());
+          peerConnectionsRef.current = {};
         }
       } catch (error) {
-        handleError(error)
+        handleError(error);
       }
     };
 
     return () => {
       if (stream) handleStopStream();
-
-      dispatch(showRoomProfile());
     };
   }, [dispatch, stopStreaming, stream]);
 
@@ -87,10 +88,10 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
       try {
         const peerConnection = new RTCPeerConnection();
 
-        setPeerConnections((prevPeerConnections) => ({
-          ...prevPeerConnections,
+        peerConnectionsRef.current = {
+          ...peerConnectionsRef.current,
           [username]: peerConnection,
-        }));
+        };
 
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
@@ -126,10 +127,13 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           const connectionState = peerConnection.connectionState;
 
           if (connectionState === "disconnected") {
-            setPeerConnections((prevPeerConnections) => {
-              const { [username]: _, ...newState } = prevPeerConnections;
-              return Object.fromEntries(Object.entries(newState));
-            });
+            peerConnectionsRef.current = Object.assign(
+              {},
+              peerConnectionsRef.current,
+              {
+                [username]: undefined,
+              }
+            );
           }
         };
 
@@ -155,7 +159,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           }
           case "answer": {
             const username = data.username;
-            const peerConnection = peerConnections?.[username];
+            const peerConnection = peerConnectionsRef.current[username];
 
             if (peerConnection)
               await peerConnection.setRemoteDescription(
@@ -167,8 +171,8 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
 
           case "candidate": {
             const username = data.username;
-            const peerConnection = peerConnections[username];
-
+            const peerConnection = peerConnectionsRef.current[username];
+            console.log(peerConnectionsRef.current);
             if (peerConnection)
               await peerConnection.addIceCandidate(
                 new RTCIceCandidate(data.data)
@@ -181,7 +185,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
         handleError(error);
       }
     },
-    [createConnectionStream, peerConnections]
+    [createConnectionStream]
   );
 
   useStompSubscription({
@@ -195,10 +199,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   return (
     <Grid container item justifyContent="center">
       <Grid container item sx={{ height: "65px" }} justifyContent="end">
-        <IconButton
-          size="large"
-          onClick={() => dispatch(unsetReadyStream())}
-        >
+        <IconButton size="large" onClick={() => dispatch(unsetReadyStream())}>
           <CloseIcon sx={{ fontSize: "35px", color: "gray" }} />
         </IconButton>
       </Grid>
@@ -215,11 +216,13 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
           stream ? dispatch(unsetReadyStream()) : handleStartStream()
         }
       >
-        {stream ?
-          <CancelIcon sx={{ fontSize: "50px", color: "red" }} /> :
-          <PlayCircleOutlineIcon sx={{ fontSize: "50px", color: "lightgray" }}
+        {stream ? (
+          <CancelIcon sx={{ fontSize: "50px", color: "red" }} />
+        ) : (
+          <PlayCircleOutlineIcon
+            sx={{ fontSize: "50px", color: "lightgray" }}
           />
-        }
+        )}
       </IconButton>
     </Grid>
   );

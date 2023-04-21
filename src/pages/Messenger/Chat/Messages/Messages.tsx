@@ -5,7 +5,7 @@ import { Grid, styled, keyframes } from "@mui/material";
 
 import SouthIcon from "@mui/icons-material/South";
 
-import Message from "./components/Message";
+import Message from "../Message";
 import useScrollBottomChat from "src/hooks/useScrollBottomChat";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import { useGetMessagesQuery } from "src/redux/features/messages.api";
@@ -18,14 +18,13 @@ const Messages: React.FC = () => {
 
   const dispatch = useAppDispatch();
 
-  const {
-    data: receivedMessages, isLoading } = useGetMessagesQuery(
-      { roomId, offset },
-      {
-        refetchOnMountOrArgChange: true,
-        skip: !roomId,
-      }
-    );
+  const { data: receivedMessages, isLoading } = useGetMessagesQuery(
+    { roomId, offset },
+    {
+      refetchOnMountOrArgChange: true,
+      skip: !roomId,
+    }
+  );
 
   const { ref, inView } = useInView({
     threshold: 1,
@@ -33,13 +32,11 @@ const Messages: React.FC = () => {
   });
 
   useEffect(() => {
-    if (receivedMessages && !isLoading)
-      dispatch(getMessages({ ...receivedMessages, currentRoomId: roomId }));
+    if (receivedMessages && !isLoading) dispatch(getMessages(receivedMessages));
   }, [dispatch, isLoading, receivedMessages, roomId]);
-  
+
   useEffect(() => {
-    if (inView)
-      dispatch(nextPage());
+    if (inView) dispatch(nextPage());
   }, [dispatch, inView]);
 
   return (
@@ -51,8 +48,8 @@ const Messages: React.FC = () => {
         height: "100%",
         backgroundImage:
           !receivedMessages?.content.length &&
-            !messages.content.length &&
-            !isLoading
+          !messages.content.length &&
+          !isLoading
             ? "url(https://i.gifer.com/origin/3f/3fcf565ccc553afcfd89858c97304705_w200.gif)"
             : null,
         backgroundRepeat: "no-repeat",

@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
 import Stomp from "stompjs";
 import { Grid } from "@mui/material";
-import { useOutletContext, useParams } from "react-router-dom";
+import { Outlet, useOutletContext, useParams } from "react-router-dom";
 
-import Messages from "./components/Messages";
-import ChatHeader from "./components/ChatHeader";
-import RoomProfile from "./components/RoomProfile";
-import SendMessageBar from "./components/SendMessageBar";
+import Messages from "./Messages";
+import ChatHeader from "./ChatHeader";
+import RoomProfile from "./RoomProfile";
+import SendMessageBar from "./SendMessageBar";
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
 import {
@@ -20,7 +20,7 @@ import {
   setStreamStatusOfUser,
   deleteStreamStatusOfUser,
   setViewer,
-  deleteViewer
+  deleteViewer,
 } from "src/redux/slices/usersSlice";
 
 interface MessageHeaders {
@@ -61,9 +61,7 @@ const Chat: React.FC = () => {
           break;
         }
         case "subscribe-event": {
-          dispatch(
-            setActiveUser(JSON.parse(message.body))
-          );
+          dispatch(setActiveUser(JSON.parse(message.body)));
           break;
         }
         case "unsubscribe-event": {
@@ -71,7 +69,13 @@ const Chat: React.FC = () => {
           break;
         }
         case "stream-started-event": {
-          dispatch(setStreamStatusOfUser({ id: Date.now(), streamer: message.body, viewers: [] }))
+          dispatch(
+            setStreamStatusOfUser({
+              id: Date.now(),
+              streamer: message.body,
+              viewers: [],
+            })
+          );
           break;
         }
         case "stream-ended-event": {
@@ -79,7 +83,7 @@ const Chat: React.FC = () => {
           break;
         }
         case "stream-viewer-joined": {
-          dispatch(setViewer(JSON.parse(message.body)))
+          dispatch(setViewer(JSON.parse(message.body)));
           break;
         }
         case "stream-viewer-left": {
@@ -113,6 +117,7 @@ const Chat: React.FC = () => {
         overflow: "hidden",
       }}
     >
+      <Outlet context={[clientSocket]} />
       <Grid container item sx={{ height: "65px" }}>
         <ChatHeader />
       </Grid>

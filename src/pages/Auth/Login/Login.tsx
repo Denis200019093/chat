@@ -27,7 +27,8 @@ const Login: React.FC<IProps> = ({ signingIn, dataAfterRegister }) => {
     async (values: AuthData) => {
       try {
         const { token } = await signIn(values).unwrap();
-
+        console.log(token);
+        
         if (token) {
           navigate("/");
           dispatch(getMe({ username: values.username }));

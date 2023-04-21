@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Button, Typography } from "@mui/material";
 
-import Login from "./components/Login";
-import Register from "./components/Register";
+import Login from "./Login";
+import Register from "./Register";
 import bggif from "../../assets/subtle-prism.svg";
 
 const Auth: React.FC = () => {

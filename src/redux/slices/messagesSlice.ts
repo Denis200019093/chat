@@ -6,7 +6,6 @@ interface IState {
   messages: {
     content: IMessage[];
     totalPages: number | null;
-    currentRoomId: string | null | undefined;
   };
   offset: number;
   editStatus: {
@@ -20,7 +19,6 @@ const initialState: IState = {
   messages: {
     content: [],
     totalPages: null,
-    currentRoomId: null,
   },
   offset: 0,
   editStatus: {
@@ -37,9 +35,7 @@ const messagesSlice = createSlice({
     getMessages(state, action: PayloadAction<MessagesData>) {
       state.messages = {
         content: [...state.messages.content, ...action.payload.content],
-        // content: [...action.payload.content, ...state.messages.content],
         totalPages: action.payload.totalPages,
-        currentRoomId: action.payload.currentRoomId,
       };
     },
     nextPage(state) {
@@ -91,7 +87,6 @@ const messagesSlice = createSlice({
     clear(state) {
       state.messages.content = [];
       state.messages.totalPages = null;
-      state.messages.currentRoomId = null;
     },
   },
 });

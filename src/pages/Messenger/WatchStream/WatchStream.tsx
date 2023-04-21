@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef } from "react";
 import Stomp from "stompjs";
-import { useParams } from "react-router-dom";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
 
 import AddIcCallIcon from "@mui/icons-material/AddIcCall";
@@ -14,15 +14,10 @@ import {
   useStopWatchingMutation,
 } from "src/redux/features/stream.api";
 
-interface IProps {
-  clientSocket: Stomp.Client | null;
-}
+const WatchStream: React.FC = () => {
+  const [clientSocket] = useOutletContext<any>();
 
-const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
   const { me } = useAppSelector((state) => state.users);
-  const { isReadyToWatch, streamerUsername } = useAppSelector(
-    (state) => state.stream
-  );
 
   const [watchStream] = useStartWatchMutation();
   const [stopWatching] = useStopWatchingMutation();
@@ -31,8 +26,7 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
   const liveStream = useRef<HTMLVideoElement | null>(null);
 
   const dispatch = useAppDispatch();
-
-  const { id: roomId } = useParams();
+  const { id: roomId, streamerName } = useParams();
 
   const handleSocketMessage = useCallback(
     async (message: Stomp.Message) => {
@@ -93,10 +87,13 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
 
   const startWatchStream = useCallback(async () => {
     try {
-      if (!peerConnection.current && isReadyToWatch && streamerUsername) {
+      console.log("Hellooo 1");
+      if (!peerConnection.current && streamerName) {
+        console.log("Hellooo 2");
+
         const pc = new RTCPeerConnection();
 
-        await watchStream(streamerUsername)
+        await watchStream(streamerName);
 
         clientSocket?.send(
           `/chatrooms/${roomId}/streamer`,
@@ -106,6 +103,7 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
 
         pc.ontrack = (event) => {
           const remoteStream = event.streams[0];
+          console.log(remoteStream);
 
           if (liveStream.current && remoteStream) {
             liveStream.current.srcObject = remoteStream;
@@ -133,24 +131,26 @@ const WatchStream: React.FC<IProps> = ({ clientSocket }) => {
     } catch (error) {
       handleError(error);
     }
-  }, [clientSocket, isReadyToWatch, me?.username, roomId, streamerUsername, watchStream]);
+  }, [clientSocket, me?.username, roomId, streamerName, watchStream]);
 
   const stopWatchStream = useCallback(async () => {
     try {
-      await stopWatching(streamerUsername);
-      dispatch(unsetReadyWatch());
+      if (streamerName) {
+        await stopWatching(streamerName);
+        dispatch(unsetReadyWatch());
+      }
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
-  }, [dispatch, stopWatching, streamerUsername]);
+  }, [dispatch, stopWatching, streamerName]);
 
   useEffect(() => {
-    if (isReadyToWatch && streamerUsername) startWatchStream();
+    if (streamerName) startWatchStream();
 
     return () => {
       stopWatchStream();
     };
-  }, [isReadyToWatch, startWatchStream, stopWatchStream, streamerUsername]);
+  }, [startWatchStream, stopWatchStream, streamerName]);
 
   return (
     <Grid container>
