@@ -1,5 +1,4 @@
 {
   "builds": [{ "src": "dist/", "use": "@vercel/static" }],
-  "routes": [{ "src": "/(.*)", "dest": "/index.html" }],
-  "rewrites": [{ "source": "/src/(.*)", "destination": "/pages/NotFound.tsx" }]
+  "routes": [{ "src": "/(.*)", "dest": "/index.html" }]
 }
