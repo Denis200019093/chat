@@ -11,6 +11,7 @@ import { useAppDispatch } from "./hooks/useRedux";
 import { getMe } from "./redux/slices/usersSlice";
 import { useGetMeQuery } from "./redux/features/auth.api";
 import WatchStream from "./pages/Messenger/WatchStream";
+import StartStream from "./pages/Messenger/StartStream";
 
 const Chat = lazy(() => import("./pages/Messenger/Chat"));
 
@@ -43,6 +44,7 @@ const PrivateRoutes = () => (
         }
       >
         <Route path="watch/:streamerName" element={<WatchStream />} />
+        <Route path="stream-manager" element={<StartStream />} />
       </Route>
     </Route>
     <Route path="/profile" element={<Profile />} />

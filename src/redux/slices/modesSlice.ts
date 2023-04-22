@@ -1,20 +1,18 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-interface SnackbarParams {
-  text: string;
-  severity?: "error" | "warning" | "info" | "success";
-  open?: boolean;
-}
+import { SnackbarParams } from "src/types/root";
 
 interface IState {
   creatingRoom: boolean;
   showRoomProfile: boolean;
+  isVideo: boolean;
   snackbarStatus: SnackbarParams;
 }
 
 const initialState: IState = {
   creatingRoom: false,
   showRoomProfile: true,
+  isVideo: false,
   snackbarStatus: {
     open: false,
     text: "",
@@ -38,6 +36,12 @@ const modesSlice = createSlice({
     hideRoomProfile(state) {
       state.showRoomProfile = false;
     },
+    showVideo(state) {
+      state.isVideo = true;
+    },
+    hideVideo(state) {
+      state.isVideo = false;
+    },
     openSnackbar(state, action: PayloadAction<SnackbarParams>) {
       state.snackbarStatus.open = true;
       state.snackbarStatus.text = action.payload.text;
@@ -57,5 +61,7 @@ export const {
   hideRoomProfile,
   openSnackbar,
   closeSnackbar,
+  showVideo,
+  hideVideo,
 } = modesSlice.actions;
 export const modesReducer = modesSlice.reducer;

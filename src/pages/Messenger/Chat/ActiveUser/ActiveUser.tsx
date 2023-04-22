@@ -1,8 +1,8 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { Grid, Typography, Avatar, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { useAppSelector } from "src/hooks/useRedux";
 import { IUser } from "src/types/root";
 
 interface IProps {
@@ -12,21 +12,21 @@ interface IProps {
 const ActiveUser: React.FC<IProps> = ({ user }) => {
   const { me } = useAppSelector((state) => state.users);
 
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
   const youStream = me?.username === user.username;
 
-  const startWatchStream = () => {
-    if (!youStream) {
-      // dispatch(setStreamerUsername(user.username));
-      navigate(`watch/${user.username}`);
-      // dispatch(setReadyWatch());
-    }
-  };
-
   return (
-    <Grid container item alignItems="center" justifyContent="space-between">
+    <Grid
+      container
+      item
+      sx={{
+        pb: 1,
+        "&:hover": {
+          bgcolor: "rgb(50,50,50)",
+        },
+      }}
+      alignItems="center"
+      justifyContent="space-between"
+    >
       <Grid item>
         <Grid container alignItems="center">
           <Avatar sx={{ mr: 1 }} />
@@ -35,27 +35,27 @@ const ActiveUser: React.FC<IProps> = ({ user }) => {
       </Grid>
       <Grid item>
         {user.stream ? (
-          <Button
-            sx={{ cursor: youStream ? "not-allowed" : "pointer" }}
-            variant="live"
-            onClick={startWatchStream}
-          >
-            {youStream ? "You" : "Live"}
-          </Button>
+          <NavLink to={`watch/${user.username}`}>
+            <Button
+              sx={{ cursor: youStream ? "not-allowed" : "pointer" }}
+              variant="live"
+            >
+              {youStream ? "You" : "Live"}
+            </Button>
+          </NavLink>
         ) : null}
       </Grid>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} justifyContent="flex-end">
         {user.stream
           ? user.stream.viewers.map((viewer, index) => (
-              <Grid key={viewer + index} container item>
+              <Grid key={viewer + index} container item xs={10}>
                 <Typography
                   key={viewer}
                   sx={{
-                    width: "100%",
-                    bgcolor: "purple",
-                    mb: 1,
-                    p: 1,
+                    flexBasis: "100%",
+                    bgcolor: "rgb(70,70,70)",
                     borderRadius: "8px",
+                    p: 1
                   }}
                 >
                   {viewer}

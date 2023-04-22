@@ -6,11 +6,7 @@ import MultiLineText from "src/components/MultiLineText";
 import { IRoom } from "src/types/root";
 import { clear, clearPageCount } from "src/redux/slices/messagesSlice";
 import { useAppDispatch } from "src/hooks/useRedux";
-import { showRoomProfile } from "src/redux/slices/modesSlice";
-import {
-  unsetReadyStream,
-  unsetReadyWatch,
-} from "src/redux/slices/streamSlice";
+import { hideVideo, showRoomProfile } from "src/redux/slices/modesSlice";
 
 interface IProps {
   room: IRoom;
@@ -28,6 +24,7 @@ const Room = forwardRef<HTMLDivElement, IProps>(
 
     const joinRoom = async (id: string) => {
       const path = `/chatroom/${id}`;
+      navigate(path);
 
       if (pathname === path) {
         return;
@@ -35,10 +32,8 @@ const Room = forwardRef<HTMLDivElement, IProps>(
 
       dispatch(clear());
       dispatch(clearPageCount());
-      dispatch(unsetReadyStream());
-      dispatch(unsetReadyWatch());
+      dispatch(hideVideo());
       dispatch(showRoomProfile());
-      navigate(path);
     };
 
     return (

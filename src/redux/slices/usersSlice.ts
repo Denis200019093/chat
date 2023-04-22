@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUser, IUserBasicData, StreamerData } from "src/types/root";
+
+import {
+  IUser,
+  IUserBasicData,
+  StreamerData,
+  StreamerViewerUsernames,
+} from "src/types/root";
 
 type UserData = IUser | IUserBasicData;
 
@@ -58,16 +64,10 @@ const usersSlice = createSlice({
         return streamer;
       });
     },
-    setViewer(
-      state,
-      action: PayloadAction<{
-        viewerUsername: string;
-        streamerName: string;
-      }>
-    ) {
+    setViewer(state, action: PayloadAction<StreamerViewerUsernames>) {
       state.activeUsers = state.activeUsers.map((streamer) => {
         if (
-          streamer.username === action.payload.streamerName &&
+          streamer.username === action.payload.streamerUsername &&
           streamer.stream
         ) {
           return {
@@ -84,18 +84,12 @@ const usersSlice = createSlice({
         return streamer;
       });
     },
-    deleteViewer(
-      state,
-      action: PayloadAction<{
-        viewerUsername: string;
-        streamerName: string;
-      }>
-    ) {
+    deleteViewer(state, action: PayloadAction<StreamerViewerUsernames>) {
       state.activeUsers = state.activeUsers.map((streamer) => {
         if (
           streamer.stream &&
           streamer.stream.viewers.includes(action.payload.viewerUsername) &&
-          streamer.username === action.payload.streamerName
+          streamer.username === action.payload.streamerUsername
         ) {
           return {
             ...streamer,

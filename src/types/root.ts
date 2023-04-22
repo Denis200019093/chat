@@ -67,3 +67,14 @@ export interface CreateRoomData {
   name: string;
   description: string;
 }
+
+export interface SnackbarParams {
+  text: string;
+  severity?: "error" | "warning" | "info" | "success";
+  open?: boolean;
+}
+
+export interface StreamerViewerUsernames {
+  viewerUsername: string;
+  streamerUsername: string;
+}

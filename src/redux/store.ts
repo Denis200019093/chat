@@ -3,7 +3,6 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { api } from "./features/api";
 import { modesReducer } from "./slices/modesSlice";
 import { usersReducer } from "./slices/usersSlice";
-import { streamReducer } from "./slices/streamSlice";
 import { messagesReducer } from "./slices/messagesSlice";
 
 const rootReducer = combineReducers({
@@ -11,7 +10,6 @@ const rootReducer = combineReducers({
   modes: modesReducer,
   messages: messagesReducer,
   users: usersReducer,
-  stream: streamReducer,
 });
 
 export const setupStore = () => {

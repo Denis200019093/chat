@@ -5,7 +5,6 @@ import { IMessage, MessagesData } from "../../types/root";
 interface IState {
   messages: {
     content: IMessage[];
-    totalPages: number | null;
   };
   offset: number;
   editStatus: {
@@ -18,7 +17,6 @@ interface IState {
 const initialState: IState = {
   messages: {
     content: [],
-    totalPages: null,
   },
   offset: 0,
   editStatus: {
@@ -35,7 +33,6 @@ const messagesSlice = createSlice({
     getMessages(state, action: PayloadAction<MessagesData>) {
       state.messages = {
         content: [...state.messages.content, ...action.payload.content],
-        totalPages: action.payload.totalPages,
       };
     },
     nextPage(state) {
@@ -45,7 +42,7 @@ const messagesSlice = createSlice({
       state.offset = 0;
     },
     addMessage(state, action: PayloadAction<IMessage>) {
-      state.messages.content = [...state.messages.content, action.payload];
+      state.messages.content = [action.payload, ...state.messages.content];
     },
     deleteMessage(state, action: PayloadAction<number>) {
       state.messages.content = state.messages.content.filter(
@@ -86,7 +83,6 @@ const messagesSlice = createSlice({
     },
     clear(state) {
       state.messages.content = [];
-      state.messages.totalPages = null;
     },
   },
 });

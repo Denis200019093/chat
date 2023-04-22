@@ -1,13 +1,13 @@
 import React, { useEffect, useCallback, useRef } from "react";
 import Stomp from "stompjs";
-import { useLocation, useOutletContext, useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { Grid, Typography } from "@mui/material";
 
 import AddIcCallIcon from "@mui/icons-material/AddIcCall";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { unsetReadyWatch } from "src/redux/slices/streamSlice";
+import { showVideo } from "src/redux/slices/modesSlice";
 import { handleError } from "src/helpers/handleError";
 import {
   useStartWatchMutation,
@@ -25,7 +25,7 @@ const WatchStream: React.FC = () => {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const liveStream = useRef<HTMLVideoElement | null>(null);
 
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { id: roomId, streamerName } = useParams();
 
   const handleSocketMessage = useCallback(
@@ -87,10 +87,7 @@ const WatchStream: React.FC = () => {
 
   const startWatchStream = useCallback(async () => {
     try {
-      console.log("Hellooo 1");
       if (!peerConnection.current && streamerName) {
-        console.log("Hellooo 2");
-
         const pc = new RTCPeerConnection();
 
         await watchStream(streamerName);
@@ -137,12 +134,11 @@ const WatchStream: React.FC = () => {
     try {
       if (streamerName) {
         await stopWatching(streamerName);
-        dispatch(unsetReadyWatch());
       }
     } catch (error) {
       handleError(error);
     }
-  }, [dispatch, stopWatching, streamerName]);
+  }, [stopWatching, streamerName]);
 
   useEffect(() => {
     if (streamerName) startWatchStream();
@@ -152,18 +148,31 @@ const WatchStream: React.FC = () => {
     };
   }, [startWatchStream, stopWatchStream, streamerName]);
 
+  const stopWatchStreamAndNavigate = () => {
+    navigate(`/chatroom/${roomId}`);
+    stopWatchStream();
+  };
+
   return (
-    <Grid container>
-      <Typography>Live stream</Typography>
+    <Grid item xs={9}>
+      <Grid
+        container
+        item
+        sx={{ height: "65px" }}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Typography variant="h2">Live stream</Typography>
+      </Grid>
       <video
         controls
-        style={{ height: "100%", width: "100%" }}
+        style={{ maxHeight: "500px", width: "100%" }}
         autoPlay
         ref={liveStream}
       />
       <Grid container item sx={{ mt: 3 }} justifyContent="center">
         <AddIcCallIcon
-          onClick={stopWatchStream}
+          onClick={stopWatchStreamAndNavigate}
           sx={{
             fontSize: "30px",
             bgcolor: "red",

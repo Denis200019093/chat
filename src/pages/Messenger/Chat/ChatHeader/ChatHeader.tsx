@@ -3,14 +3,16 @@ import { Avatar, Button, Grid } from "@mui/material";
 
 import Diversity1Icon from "@mui/icons-material/Diversity1";
 
-import { setReadyStream } from "src/redux/slices/streamSlice";
 import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { hideRoomProfile, showRoomProfile } from "src/redux/slices/modesSlice";
+import {
+  hideRoomProfile,
+  showRoomProfile,
+  showVideo,
+} from "src/redux/slices/modesSlice";
+import { NavLink } from "react-router-dom";
 
 const ChatHeader: React.FC = () => {
-  const { isReadyToStream, isReadyToWatch } = useAppSelector(
-    (state) => state.stream
-  );
+  const { isVideo } = useAppSelector((state) => state.modes);
 
   const dispatch = useAppDispatch();
 
@@ -35,22 +37,24 @@ const ChatHeader: React.FC = () => {
         </Grid>
         <Grid item sx={{ mr: 1 }}>
           <Grid container alignItems="center">
-            {isReadyToStream || isReadyToWatch ? (
+            {isVideo ? (
               <Diversity1Icon
                 sx={{ ml: 2, color: "#fff", cursor: "pointer" }}
                 onClick={() => dispatch(showRoomProfile())}
               />
             ) : (
-              <Button
-                onClick={() => {
-                  dispatch(hideRoomProfile());
-                  dispatch(setReadyStream());
-                }}
-                variant="contained"
-                color="secondary"
-              >
-                Live
-              </Button>
+              <NavLink to="stream-manager">
+                <Button
+                  onClick={() => {
+                    dispatch(hideRoomProfile());
+                    dispatch(showVideo());
+                  }}
+                  variant="contained"
+                  color="secondary"
+                >
+                  Live
+                </Button>
+              </NavLink>
             )}
           </Grid>
         </Grid>

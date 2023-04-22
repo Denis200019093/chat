@@ -26,9 +26,7 @@ const RoomProfile: React.FC = () => {
   const dispatch = useAppDispatch();
   const { id: roomId } = useParams();
 
-  const { isReadyToStream, isReadyToWatch } = useAppSelector(
-    (state) => state.stream
-  );
+  const { isVideo } = useAppSelector((state) => state.modes);
 
   const { data: roomInfo, isFetching } = useGetRoomInfoQuery(roomId, {
     refetchOnMountOrArgChange: true,
@@ -39,7 +37,7 @@ const RoomProfile: React.FC = () => {
     if (roomInfo && roomInfo.activeUsers?.length && roomId)
       dispatch(getActiveUsers(roomInfo.activeUsers));
   }, [dispatch, roomId, roomInfo]);
-
+  
   return (
     <Drawer
       anchor="right"
@@ -73,7 +71,7 @@ const RoomProfile: React.FC = () => {
               quantityLines={2}
               variant="h2"
             />
-            {isReadyToStream || isReadyToWatch ? (
+            {isVideo ? (
               <IconButton
                 onClick={() => dispatch(hideRoomProfile())}
                 size="small"

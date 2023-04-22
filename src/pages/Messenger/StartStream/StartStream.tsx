@@ -1,27 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Stomp from "stompjs";
 import { Grid, IconButton } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import CloseIcon from "@mui/icons-material/Close";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CancelIcon from "@mui/icons-material/Cancel";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 
 import useStompSubscription from "src/hooks/useStompSubscriptions";
-import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
-import { unsetReadyStream } from "src/redux/slices/streamSlice";
-import { showRoomProfile } from "src/redux/slices/modesSlice";
 import { handleError } from "src/helpers/handleError";
+import { useAppDispatch, useAppSelector } from "src/hooks/useRedux";
+import { hideVideo, showRoomProfile } from "src/redux/slices/modesSlice";
 import {
   useStartStreamMutation,
   useStopStreamingMutation,
 } from "src/redux/features/stream.api";
 
-interface IProps {
-  clientSocket: Stomp.Client | null;
-}
+const StartStream: React.FC = () => {
+  const [clientSocket] = useOutletContext<any>();
 
-const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isStreaming, setStreaming] = useState<boolean>(false);
 
@@ -32,6 +29,7 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   const [startStream] = useStartStreamMutation();
   const [stopStreaming] = useStopStreamingMutation();
 
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const { me } = useAppSelector((state) => state.users);
@@ -59,29 +57,32 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     }
   };
 
-  useEffect(() => {
-    const handleStopStream = async () => {
-      try {
-        if (stream) {
-          const tracks = stream.getTracks();
-          tracks.forEach((track) => track.stop());
+  const handleStopStream = useCallback(async () => {
+    try {
+      dispatch(hideVideo());
+      dispatch(showRoomProfile());
 
-          await stopStreaming();
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach((track) => track.stop());
 
-          setStream(null);
-          setStreaming(false);
-          dispatch(showRoomProfile());
-          peerConnectionsRef.current = {};
-        }
-      } catch (error) {
-        handleError(error);
+        await stopStreaming();
+
+        setStream(null);
+        setStreaming(false);
+
+        peerConnectionsRef.current = {};
       }
-    };
+    } catch (error) {
+      handleError(error);
+    }
+  }, [dispatch, stopStreaming, stream]);
 
+  useEffect(() => {
     return () => {
       if (stream) handleStopStream();
     };
-  }, [dispatch, stopStreaming, stream]);
+  }, [handleStopStream, stream]);
 
   const createConnectionStream = useCallback(
     async (username: string) => {
@@ -188,6 +189,11 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
     [createConnectionStream]
   );
 
+  const stopStreamAndNavigate = () => {
+    navigate(`/chatroom/${roomId}`);
+    handleStopStream();
+  };
+
   useStompSubscription({
     roomId,
     clientSocket,
@@ -197,33 +203,35 @@ const StartStream: React.FC<IProps> = ({ clientSocket }) => {
   });
 
   return (
-    <Grid container item justifyContent="center">
+    <Grid item xs={9}>
       <Grid container item sx={{ height: "65px" }} justifyContent="end">
-        <IconButton size="large" onClick={() => dispatch(unsetReadyStream())}>
+        <IconButton size="large" onClick={stopStreamAndNavigate}>
           <CloseIcon sx={{ fontSize: "35px", color: "gray" }} />
         </IconButton>
       </Grid>
       <video
         controls
-        style={{ height: "100%", width: "100%" }}
+        style={{ maxHeight: "800px", width: "100%" }}
         autoPlay
         ref={currentStream}
       />
-      <IconButton
-        size="large"
-        sx={{ mt: 3 }}
-        onClick={() =>
-          stream ? dispatch(unsetReadyStream()) : handleStartStream()
-        }
-      >
-        {stream ? (
-          <CancelIcon sx={{ fontSize: "50px", color: "red" }} />
-        ) : (
-          <PlayCircleOutlineIcon
-            sx={{ fontSize: "50px", color: "lightgray" }}
-          />
-        )}
-      </IconButton>
+      <Grid container justifyContent="center">
+        <IconButton
+          size="large"
+          sx={{ mt: 3 }}
+          onClick={() =>
+            stream ? stopStreamAndNavigate() : handleStartStream()
+          }
+        >
+          {stream ? (
+            <CancelIcon sx={{ fontSize: "50px", color: "red" }} />
+          ) : (
+            <PlayCircleOutlineIcon
+              sx={{ fontSize: "50px", color: "lightgray" }}
+            />
+          )}
+        </IconButton>
+      </Grid>
     </Grid>
   );
 };

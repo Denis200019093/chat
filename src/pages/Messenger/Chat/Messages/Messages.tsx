@@ -33,7 +33,7 @@ const Messages: React.FC = () => {
 
   useEffect(() => {
     if (receivedMessages && !isLoading) dispatch(getMessages(receivedMessages));
-  }, [dispatch, isLoading, receivedMessages, roomId]);
+  }, [dispatch, isLoading, receivedMessages]);
 
   useEffect(() => {
     if (inView) dispatch(nextPage());
@@ -68,7 +68,7 @@ const Messages: React.FC = () => {
               ref={ref}
               message={message}
             />
-          ))}
+          )).reverse()}
       </Grid>
       {!receivedMessages?.content.length &&
         !messages.content.length &&
